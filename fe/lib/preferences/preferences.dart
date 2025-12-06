@@ -47,4 +47,24 @@ class PreferencesCubit extends Cubit<PreferencesState> {
       selectedDateId: dateId,
     ));
   }
+
+  // User goes back
+  void goBack() {
+    switch (state.status) {
+      case PreferencesStatus.listProfiles:
+        emit(state.copyWith(
+          status: PreferencesStatus.listDates,
+          selectedDateId: null,
+        ));
+        break;
+      case PreferencesStatus.listDates:
+        emit(state.copyWith(
+          status: PreferencesStatus.initial,
+          selectedDateId: null,
+        ));
+        break;
+      case PreferencesStatus.initial:
+        break;
+    }
+  }
 }

@@ -21,6 +21,7 @@ class PreferencesScreen extends StatelessWidget {
   AppBar _buildAppBar(BuildContext context, PreferencesStatus status) {
     String title = '';
     List<Widget> actions = [];
+    final cubit = context.read<PreferencesCubit>();
 
     if (status == PreferencesStatus.initial) {
       title = 'Start Dating';
@@ -42,7 +43,7 @@ class PreferencesScreen extends StatelessWidget {
           ? IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
-          // TODO: Implement a simple goBack logic in the cubit if desired, or just navigate back to the previous state.
+          cubit.goBack();
         },
       )
           : null,
