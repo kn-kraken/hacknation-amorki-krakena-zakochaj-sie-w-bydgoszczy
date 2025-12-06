@@ -110,7 +110,7 @@ async def read_next(
 async def swipe(
     me: Annotated[User, Depends(get_me)],
     login: str,
-    matched: bool,
+    approved: bool,
     users: Annotated[Collection[User], Depends(get_user_db)],
     user_links: Annotated[Collection[UserLink], Depends(get_user_link_db)],
 ):
@@ -139,9 +139,15 @@ async def swipe(
         )
 
     if link["login_1"] == my_login:
-        link["approved_1"] = matched
+        link["approved_1"] = approved
     else:
-        link["approved_2"] = matched
+        link["approved_2"] = approved
 
     _ = user_links.update_one(link_filter, {"$set": link}, upsert=True)
-    return Response()
+
+    matched = all([link["approved_1"], link["approved_2"]])
+    return SwipeRes(matched=matched)
+
+
+class SwipeRes(BaseModel):
+    matched: bool
