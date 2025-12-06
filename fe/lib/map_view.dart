@@ -4,6 +4,10 @@ import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' show json;
 
+import 'package:zakochaj_sie_w_bydgoszczy_fe/quiz_view.dart';
+// Import your quiz screen
+// import 'package:your_package_name/quiz_view_screen.dart';
+
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
 
@@ -178,7 +182,14 @@ class _MapScreenState extends State<MapScreen> {
                   alignment: Alignment.topCenter,
                   child: GestureDetector(
                     onTap: () {
-                      _showPlaceDialog(context, wp);
+                      // Navigate to quiz screen with location index
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              QuizViewScreen(locationIndex: idx),
+                        ),
+                      );
                     },
                     child: Stack(
                       alignment: Alignment.topCenter,
@@ -204,8 +215,8 @@ class _MapScreenState extends State<MapScreen> {
                         Positioned(
                           top: 8,
                           child: Container(
-                            width: 24,
-                            height: 24,
+                            width: 26,
+                            height: 26,
                             decoration: BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
@@ -279,49 +290,6 @@ class _MapScreenState extends State<MapScreen> {
               _mapController.move(_center, 14.0);
             },
             child: const Icon(Icons.my_location),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showPlaceDialog(BuildContext context, Map<String, dynamic> place) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(place['name'] as String),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                place['imageUrl'] as String,
-                height: 200,
-                width: 200,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: 200,
-                    width: 200,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.image, size: 50),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Location: ${(place['location'] as LatLng).latitude.toStringAsFixed(4)}, '
-              '${(place['location'] as LatLng).longitude.toStringAsFixed(4)}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
           ),
         ],
       ),
