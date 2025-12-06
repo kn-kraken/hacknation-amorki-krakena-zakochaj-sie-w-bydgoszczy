@@ -1,5 +1,3 @@
-db = db.getSiblingDB("bydgoszcz");
-
 db.users.insertMany([
   {
     login: "jkow",
