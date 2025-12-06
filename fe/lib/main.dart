@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Zakochaj się w Bydgoszczy',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(scaffoldBackgroundColor: Color(0xFFdbdad8)),
       home: MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => PreferencesCubit()),

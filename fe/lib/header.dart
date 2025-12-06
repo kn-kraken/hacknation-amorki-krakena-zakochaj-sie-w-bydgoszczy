@@ -28,7 +28,6 @@ class Header extends StatelessWidget {
                 Color(0xFF8B2F3A), // White stamp border
                 BlendMode.srcIn,
               ),
-              // fit: BoxFit.fill,
             ),
           ),
 

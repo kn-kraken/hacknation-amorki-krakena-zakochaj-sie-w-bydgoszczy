@@ -31,8 +31,8 @@ class PreferencesScreen extends StatelessWidget {
 
     Widget _buildProfileCircle() {
       return Container(
-        width: 30,
-        height: 30,
+        width: 40,
+        height: 40,
         margin: const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.5),
@@ -71,19 +71,19 @@ class PreferencesScreen extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => cubit.goBack(),
-            ),
-            const SizedBox(width: 8),
             SvgPicture.asset(
               _kCupidIconPath,
-              height: 30,
-              width: 30,
+              height: 40,
+              width: 40,
               colorFilter: const ColorFilter.mode(
                 _kRedCupidColor,
                 BlendMode.srcIn,
               ),
+            ),
+            const SizedBox(width: 10),
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color:_kRedCupidColor, size: 24),
+              onPressed: () => cubit.goBack(),
             ),
           ],
         ),
@@ -118,7 +118,7 @@ class PreferencesScreen extends StatelessWidget {
 class InitialPage extends StatelessWidget {
   const InitialPage({super.key});
   static const String _kStampFramePath = 'assets/stamp.svg';
-  static const Color _kBackgroundColor = Color(0xFFdbdad8); // Fixed: FF instead of 00
+  static const Color _kBackgroundColor = Color(0xFFdbdad8);
 
   @override
   Widget build(BuildContext context) {
