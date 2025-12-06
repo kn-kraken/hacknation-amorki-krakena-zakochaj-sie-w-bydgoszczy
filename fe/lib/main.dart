@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:zakochaj_sie_w_bydgoszczy_fe/map_view.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/preferences/preferences_screen.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/swapper.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/preferences/preferences.dart';
@@ -16,7 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Swipe Cards',
+      title: 'Zakochaj się w Bydgoszczy',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: MultiBlocProvider(
         providers: [

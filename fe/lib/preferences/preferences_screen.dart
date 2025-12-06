@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zakochaj_sie_w_bydgoszczy_fe/header.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/swapper.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/date_page.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/preferences/preferences.dart';
+import '../buttons/stamped_button.dart';
 
 class PreferencesScreen extends StatelessWidget {
   const PreferencesScreen({super.key});
@@ -20,39 +23,83 @@ class PreferencesScreen extends StatelessWidget {
   }
 
   AppBar _buildAppBar(BuildContext context, PreferencesStatus status) {
-    String title = '';
     List<Widget> actions = [];
+    Widget? leadingWidget;
     final cubit = context.read<PreferencesCubit>();
+    const _kCupidIconPath = 'assets/cupid-bow.svg';
+    const _kRedCupidColor = Color(0xFF6a1f27); // Fixed: FF instead of 00
 
-    if (status == PreferencesStatus.initial) {
-      title = 'Start Dating';
-    } else if (status == PreferencesStatus.listDatesShouldSwipe) {
-      title = 'LIST OF DATES';
-    } else if (status == PreferencesStatus.listProfiles) {
-      title = 'MATCHING PROFILES';
-      actions = [
+    Widget _buildProfileCircle() {
+      return Container(
+        width: 30,
+        height: 30,
+        margin: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.5),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2),
+        ),
+      );
+    }
+
+    if (status == PreferencesStatus.listProfiles) {
+      actions.add(
         IconButton(
           icon: const Icon(Icons.refresh),
           onPressed: () => context.read<SwipeBloc>().add(ResetCards()),
         ),
-      ];
+      );
+    }
+    actions.add(_buildProfileCircle());
+
+    if (status == PreferencesStatus.initial) {
+      leadingWidget = Padding(
+        padding: const EdgeInsets.only(left: 16.0),
+        child: SvgPicture.asset(
+          _kCupidIconPath,
+          height: 40,
+          width: 40,
+          colorFilter: const ColorFilter.mode(
+            _kRedCupidColor,
+            BlendMode.srcIn,
+          ),
+        ),
+      );
+    } else {
+      leadingWidget = Padding(
+        padding: const EdgeInsets.only(left: 16.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => cubit.goBack(),
+            ),
+            const SizedBox(width: 8),
+            SvgPicture.asset(
+              _kCupidIconPath,
+              height: 30,
+              width: 30,
+              colorFilter: const ColorFilter.mode(
+                _kRedCupidColor,
+                BlendMode.srcIn,
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     return AppBar(
-      title: Text(title),
-      leading: status != PreferencesStatus.initial
-          ? IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          cubit.goBack();
-        },
-      )
-          : null,
+      title: const Text(''),
+      leading: leadingWidget,
+      leadingWidth: status == PreferencesStatus.initial ? 56 : 120,
       actions: actions,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
     );
   }
 
-  // Helper to swap the body content
   Widget _buildBody(BuildContext context, PreferencesStatus status) {
     switch (status) {
       case PreferencesStatus.initial:
@@ -70,22 +117,41 @@ class PreferencesScreen extends StatelessWidget {
 
 class InitialPage extends StatelessWidget {
   const InitialPage({super.key});
+  static const String _kStampFramePath = 'assets/stamp.svg';
+  static const Color _kBackgroundColor = Color(0xFFdbdad8); // Fixed: FF instead of 00
+
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<PreferencesCubit>();
-    return Center(
+
+    return Container(
+      color: _kBackgroundColor,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Text('Looking for love?', style: TextStyle(fontSize: 24)),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () => cubit.startPreferencesFlow(),
-            child: const Text('YES'),
-          ),
-          ElevatedButton(
-            onPressed: () => cubit.startPreferencesNoSwipe(),
-            child: const Text('NO'),
+
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Header(text: 'CZEGO DZIŚ SZUKASZ'),
+                    StampedButton(
+                      text: 'SZUKAM PARY',
+                      onPressed: () => cubit.startPreferencesFlow(),
+                      svgAssetPath: _kStampFramePath,
+                    ),
+                    const SizedBox(height: 30),
+                    StampedButton(
+                      text: 'MAM PARTNERA/\nPARTNERKĘ',
+                      onPressed: () => cubit.startPreferencesNoSwipe(),
+                      svgAssetPath: _kStampFramePath,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
