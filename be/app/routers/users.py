@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, TypedDict
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Response
+from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel
 from pymongo.database import Collection
 
