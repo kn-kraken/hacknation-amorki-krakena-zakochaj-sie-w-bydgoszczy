@@ -1,18 +1,26 @@
-from fastapi import APIRouter
+from __future__ import annotations
 
-router = APIRouter()
+from typing import Annotated, TypedDict
 
+from fastapi import APIRouter, Depends
+from pymongo.database import Collection
 
-@router.get("/users/", tags=["users"])
-async def read_users():
-    return [{"username": "Rick"}, {"username": "Morty"}]
+from app.db import Db, get_db
 
-
-@router.get("/users/me", tags=["users"])
-async def read_user_me():
-    return {"username": "fakecurrentuser"}
+router = APIRouter(tags=["users"])
 
 
-@router.get("/users/{username}", tags=["users"])
-async def read_user(username: str):
-    return {"username": username}
+class User(TypedDict):
+    login: str
+    name: str
+
+
+def get_user_db(db: Annotated[Db, Depends(get_db)]) -> Collection[User]:
+    return db["users"]
+
+
+@router.get("/users/")
+async def read_users(
+    users: Annotated[Collection[User], Depends(get_user_db)],
+) -> list[User]:
+    return [*users.find()]
