@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math';
 
+const login = "gilewski";
+
 // Models
 class CardItem {
   final String id;
