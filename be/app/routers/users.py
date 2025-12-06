@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, TypedDict
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Header
 from pydantic import BaseModel
 from pymongo.database import Collection
 
@@ -27,7 +27,7 @@ class UserRes(BaseModel):
         return cls(
             login=user["login"],
             name=user["name"],
-            image_url=f"/blobs/{user[ "image_hash" ]}",
+            image_url=f"/blobs/{user["image_hash"]}",
         )
 
 
@@ -35,8 +35,25 @@ def get_user_db(db: Annotated[Db, Depends(get_db)]) -> Collection[User]:
     return db["users"]
 
 
+def get_me(
+    x_login: Annotated[str, Header()],
+    users: Annotated[Collection[User], Depends(get_user_db)],
+) -> User:
+    user = users.find_one({"login": x_login})
+    if user == None:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return user
+
+
 @router.get("/users/")
 async def read_users(
     users: Annotated[Collection[User], Depends(get_user_db)],
 ) -> list[UserRes]:
     return [UserRes.from_domain(user) for user in users.find()]
+
+
+@router.get("/users/me")
+async def read_me(
+    me: Annotated[User, Depends(get_me)],
+) -> UserRes:
+    return UserRes.from_domain(me)
