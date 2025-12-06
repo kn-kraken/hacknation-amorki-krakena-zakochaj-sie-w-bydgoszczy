@@ -114,8 +114,8 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
 // Main App
 
 // Screen
-class SwipeCardsScreen extends StatelessWidget {
-  const SwipeCardsScreen({Key? key}) : super(key: key);
+class SwipeCardsScreenContent extends StatelessWidget {
+  const SwipeCardsScreenContent({super.key});
 
   @override
   Widget build(BuildContext context) {
