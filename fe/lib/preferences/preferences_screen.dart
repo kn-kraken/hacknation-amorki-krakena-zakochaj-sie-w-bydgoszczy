@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/swapper.dart';
+import 'package:zakochaj_sie_w_bydgoszczy_fe/date_page.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/preferences/preferences.dart';
 
 class PreferencesScreen extends StatelessWidget {
@@ -25,7 +26,7 @@ class PreferencesScreen extends StatelessWidget {
 
     if (status == PreferencesStatus.initial) {
       title = 'Start Dating';
-    } else if (status == PreferencesStatus.listDates) {
+    } else if (status == PreferencesStatus.listDatesShouldSwipe) {
       title = 'LIST OF DATES';
     } else if (status == PreferencesStatus.listProfiles) {
       title = 'MATCHING PROFILES';
@@ -56,10 +57,13 @@ class PreferencesScreen extends StatelessWidget {
     switch (status) {
       case PreferencesStatus.initial:
         return const InitialPage();
-      case PreferencesStatus.listDates:
+      case PreferencesStatus.listDatesShouldSwipe:
+      case PreferencesStatus.listDatesNoSwipe:
         return const ListDatesPage();
       case PreferencesStatus.listProfiles:
         return const SwipeCardsScreenContent();
+      case PreferencesStatus.datePage:
+        return const DatePage();
     }
   }
 }
@@ -80,9 +84,7 @@ class InitialPage extends StatelessWidget {
             child: const Text('YES'),
           ),
           ElevatedButton(
-            onPressed: () {
-              // TODO: NO logic here yet
-            },
+            onPressed: () => cubit.startPreferencesNoSwipe(),
             child: const Text('NO'),
           ),
         ],
