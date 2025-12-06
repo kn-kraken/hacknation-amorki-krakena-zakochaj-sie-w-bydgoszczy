@@ -1,4 +1,9 @@
+from pydantic.v1 import BaseSettings
+
+
 class Settings(BaseSettings):
-    app_name: str = "Awesome API"
-    admin_email: str
-    items_per_user: int = 50
+    connection_string: str = (
+        "mongodb://admin:password@localhost:27017/bydgoszcz?authSource=admin"
+    )
+
+settings = Settings()
