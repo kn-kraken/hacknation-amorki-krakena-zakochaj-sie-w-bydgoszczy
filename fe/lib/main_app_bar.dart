@@ -12,13 +12,15 @@ Widget _buildProfileCircle() {
     height: 40,
     margin: const EdgeInsets.only(right: 16),
     decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.5),
       shape: BoxShape.circle,
       border: Border.all(color: Colors.white, width: 2),
+      image: DecorationImage(
+        image: AssetImage('assets/mezczyzna.png'), // Replace with your PNG path
+        fit: BoxFit.cover,
+      ),
     ),
   );
 }
-
 // Function to generate the custom AppBar
 AppBar buildCustomAppBar({
   required BuildContext context,
