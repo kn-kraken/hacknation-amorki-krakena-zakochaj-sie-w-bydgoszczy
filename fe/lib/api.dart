@@ -8,7 +8,7 @@ import 'package:json_annotation/json_annotation.dart' hide JsonConverter;
 part 'api.g.dart';
 part 'api.chopper.dart';
 
-const login = "gilewski";
+const login = "piotr";
 
 @JsonSerializable()
 class UserRes {
@@ -124,7 +124,7 @@ class ApiClient {
 
   ApiClient({String? baseUrl}) {
     _chopperClient = ChopperClient(
-      baseUrl: Uri.parse(baseUrl ?? 'http://localhost:8000'),
+      baseUrl: Uri.parse(baseUrl ?? 'http://192.168.1.11:8000'),
       services: [ApiService.create()],
       converter: const ApiConverter(),
       interceptors: [HttpLoggingInterceptor(), HeadersInterceptor()],
