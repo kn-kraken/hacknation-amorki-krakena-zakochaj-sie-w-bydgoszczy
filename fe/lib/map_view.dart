@@ -30,22 +30,18 @@ class _MapScreenState extends State<MapScreen> {
     {
       'name': 'Old Market Square',
       'location': LatLng(53.1236, 18.0067),
-      'imageUrl': 'https://picsum.photos/200/200?random=1',
     },
     {
       'name': 'Cathedral',
       'location': LatLng(53.1215, 18.0125),
-      'imageUrl': 'https://picsum.photos/200/200?random=4',
     },
     {
       'name': 'Mill Island',
       'location': LatLng(53.1267, 18.0089),
-      'imageUrl': 'https://picsum.photos/200/200?random=2',
     },
     {
       'name': 'Opera Nova',
       'location': LatLng(53.1198, 18.0053),
-      'imageUrl': 'https://picsum.photos/200/200?random=3',
     },
   ];
 
@@ -127,7 +123,7 @@ class _MapScreenState extends State<MapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bydgoszcz Points of Interest'),
+        title: const Text(''),
         elevation: 2,
       ),
       body: GestureDetector(
@@ -161,7 +157,7 @@ class _MapScreenState extends State<MapScreen> {
                   strokeWidth: 4.0,
                   color: _isLoadingRoute
                       ? Colors.grey.withOpacity(0.5)
-                      : Colors.blue.withOpacity(0.7),
+                      : Color(0xFF8B2F3A).withOpacity(0.7),
                   borderStrokeWidth: 1.5,
                   borderColor: Colors.white,
                   pattern: StrokePattern.dotted(),
@@ -179,7 +175,7 @@ class _MapScreenState extends State<MapScreen> {
                   point: wp['location'] as LatLng,
                   width: 50,
                   height: 70,
-                  alignment: Alignment.topCenter,
+                  alignment: Alignment.center,
                   child: GestureDetector(
                     onTap: () {
                       // Navigate to quiz screen with location index
@@ -192,7 +188,7 @@ class _MapScreenState extends State<MapScreen> {
                       );
                     },
                     child: Stack(
-                      alignment: Alignment.topCenter,
+                      alignment: Alignment.center,
                       clipBehavior: Clip.none,
                       children: [
                         // Pin icon as background
@@ -201,7 +197,7 @@ class _MapScreenState extends State<MapScreen> {
                           child: Icon(
                             Icons.location_on,
                             size: 50,
-                            color: Colors.blue,
+                            color: Color(0xFF8B2F3A),
                             shadows: [
                               Shadow(
                                 color: Colors.black26,
@@ -215,26 +211,18 @@ class _MapScreenState extends State<MapScreen> {
                         Positioned(
                           top: 8,
                           child: Container(
-                            width: 26,
-                            height: 26,
+                            width: 22,
+                            height: 22,
                             decoration: BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 3,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
                             ),
                             child: Center(
                               child: Text(
                                 '${idx + 1}',
                                 style: const TextStyle(
-                                  color: Colors.blue,
-                                  fontSize: 14,
+                                  color: Colors.black,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

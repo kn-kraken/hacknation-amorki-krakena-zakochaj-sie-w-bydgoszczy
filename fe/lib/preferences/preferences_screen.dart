@@ -7,6 +7,7 @@ import 'package:zakochaj_sie_w_bydgoszczy_fe/date_page.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/preferences/preferences.dart';
 import '../buttons/stamped_button.dart';
 import '../event_tile.dart';
+import '../main_app_bar.dart';
 
 class PreferencesScreen extends StatelessWidget {
   const PreferencesScreen({super.key});
@@ -24,80 +25,19 @@ class PreferencesScreen extends StatelessWidget {
   }
 
   AppBar _buildAppBar(BuildContext context, PreferencesStatus status) {
-    List<Widget> actions = [];
-    Widget? leadingWidget;
     final cubit = context.read<PreferencesCubit>();
-    const _kCupidIconPath = 'assets/cupid-bow.svg';
-    const _kRedCupidColor = Color(0xFF6a1f27); // Fixed: FF instead of 00
+    final isInitial = status == PreferencesStatus.initial;
+    final isSwiping = status == PreferencesStatus.listProfiles;
 
-    Widget _buildProfileCircle() {
-      return Container(
-        width: 40,
-        height: 40,
-        margin: const EdgeInsets.only(right: 16),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.5),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 2),
-        ),
-      );
-    }
+    // Check if the current status is one that uses BLoC navigation (i.e., not the MapScreen)
+    final needsGoBack = status != PreferencesStatus.initial;
 
-    if (status == PreferencesStatus.listProfiles) {
-      actions.add(
-        IconButton(
-          icon: const Icon(Icons.refresh),
-          onPressed: () => context.read<SwipeBloc>().add(ResetCards()),
-        ),
-      );
-    }
-    actions.add(_buildProfileCircle());
-
-    if (status == PreferencesStatus.initial) {
-      leadingWidget = Padding(
-        padding: const EdgeInsets.only(left: 16.0),
-        child: SvgPicture.asset(
-          _kCupidIconPath,
-          height: 40,
-          width: 40,
-          colorFilter: const ColorFilter.mode(
-            _kRedCupidColor,
-            BlendMode.srcIn,
-          ),
-        ),
-      );
-    } else {
-      leadingWidget = Padding(
-        padding: const EdgeInsets.only(left: 16.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SvgPicture.asset(
-              _kCupidIconPath,
-              height: 40,
-              width: 40,
-              colorFilter: const ColorFilter.mode(
-                _kRedCupidColor,
-                BlendMode.srcIn,
-              ),
-            ),
-            const SizedBox(width: 10),
-            IconButton(
-              icon: const Icon(Icons.arrow_back, color:_kRedCupidColor, size: 24),
-              onPressed: () => cubit.goBack(),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return AppBar(
-      title: const Text(''),
-      leading: leadingWidget,
-      leadingWidth: status == PreferencesStatus.initial ? 56 : 120,
-      actions: actions,
-      backgroundColor: Colors.transparent,
-      elevation: 0,
+    return buildCustomAppBar(
+      context: context,
+      isInitialPage: isInitial,
+      showBackButton: needsGoBack,
+      showRefreshButton: isSwiping,
+      cubit: cubit, // Pass the cubit for BLoC navigation
     );
   }
 
