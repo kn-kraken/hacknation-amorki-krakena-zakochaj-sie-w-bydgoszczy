@@ -1,3 +1,5 @@
+ // ignore_for_file: type_literal_in_constant_pattern
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:chopper/chopper.dart';
@@ -86,15 +88,10 @@ class ApiConverter extends JsonConverter {
   @override
   FutureOr<Response<BodyType>> convertResponse<BodyType, SingleItemType>(
       Response response) {
-    print("ApiConverter: Converting response for type $BodyType");
-    print("ApiConverter: Raw response body: ${response.body}");
-    print("ApiConverter: Response status: ${response.statusCode}");
-    
     // Don't call super - handle the conversion ourselves
     final rawBody = response.body;
     
     if (rawBody == null) {
-      print("ApiConverter: Raw body is null");
       return Response(response.base, null, error: response.error);
     }
 
@@ -103,38 +100,19 @@ class ApiConverter extends JsonConverter {
     if (rawBody is String) {
       try {
         jsonBody = json.decode(rawBody);
-        print("ApiConverter: Parsed JSON from string: $jsonBody");
       } catch (e) {
-        print("ApiConverter: Failed to parse JSON: $e");
         return Response(response.base, null, error: e);
       }
     } else {
       jsonBody = rawBody;
     }
 
-    // Handle different response types
-    BodyType? convertedBody;
-    try {
-      if (BodyType == UserRes) {
-        print("ApiConverter: Converting to UserRes");
-        convertedBody = UserRes.fromJson(jsonBody as Map<String, dynamic>) as BodyType;
-        print("ApiConverter: Successfully converted to UserRes: $convertedBody");
-      } else if (BodyType == SwipeRes) {
-        print("ApiConverter: Converting to SwipeRes");
-        convertedBody = SwipeRes.fromJson(jsonBody as Map<String, dynamic>) as BodyType;
-      } else if (BodyType == Item) {
-        print("ApiConverter: Converting to Item");
-        convertedBody = Item.fromJson(jsonBody as Map<String, dynamic>) as BodyType;
-      } else {
-        print("ApiConverter: No specific converter for $BodyType, falling back to parent");
-        // For other types, use parent converter
-        return super.convertResponse<BodyType, SingleItemType>(response);
-      }
-    } catch (e, stackTrace) {
-      print("ApiConverter: Error converting: $e");
-      print("ApiConverter: Stack trace: $stackTrace");
-      return Response(response.base, null, error: e);
-    }
+    final convertedBody = switch (BodyType) {
+      UserRes => UserRes.fromJson(jsonBody),
+      SwipeRes => SwipeRes.fromJson(jsonBody),
+      Item => Item.fromJson(jsonBody),
+      _ => super.convertResponse<BodyType, SingleItemType>(response),
+    } as BodyType;
 
     return Response(response.base, convertedBody, error: response.error);
   }
