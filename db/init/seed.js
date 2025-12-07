@@ -97,7 +97,10 @@ db.user_links.insertMany([
 
 steps = [
   {
+    id: 1,
     type: "question",
+    lat: 53.123275,
+    long: 18.001697,
     question:
       "Zaobserwuj rzeźbę przy moście. Zgadnij nazwę rzeźby, którą widzisz:",
     answers: ["Akrobata", "Przechodzący przez rzekę", "Dzień w chmurach"],
@@ -106,7 +109,10 @@ steps = [
       "Czy wiesz, że ta rzeźba to genialne zastosowanie fizyki? Środek ciężkości figury znajduje się poniżej liny, na której wisi. Dzięki temu „Przechodzący” utrzymuje równowagę sam z siebie i nie przewróci go nawet silny wiatr!",
   },
   {
+    id: 2,
     type: "question",
+    lat: 53.122973,
+    long: 17.999429,
     question: "Katedra Bydgoska. Zgadnij rok budowy:",
     answers: ["1466", "1604", "1308"],
     validAnswerIndex: 0,
@@ -114,7 +120,10 @@ steps = [
       "Katedra jest najstarszym budynkiem w Bydgoszczy. W trakcie prac konserwatorskich prowadzonych w bydgoskiej katedrze archeolodzy odnaleźli prawdziwy skarb!",
   },
   {
+    id: 3,
     type: "question",
+    lat: 53.119686,
+    long: 17.990881,
     question: "Wieża ciśnień. Zgadnij wysokość zabytku:",
     answers: ["21 m", "45 m", "32 m"],
     validAnswerIndex: 1,
@@ -122,22 +131,31 @@ steps = [
       "Kiedyś wewnątrz znajdował się gigantyczny zbiornik, który mieścił aż 1260 m³ wody – to tyle, co ok. 4000 pełnych wanien!",
   },
   {
+    id: 4,
     type: "question",
+    lat: 53.122926,
+    long: 17.994599,
     question:
-      "Wyspa. Znajdź dom Dom Leona Wyczółkowskiego. W jakim stylu powstał ten dom?",
+      "Wyspa Młyńska. Znajdź dom Dom Leona Wyczółkowskiego. W jakim stylu powstał ten dom?",
     answers: ["Gotyckim", "Neoromantycznym", "Romańskim"],
     validAnswerIndex: 1,
     curiocity:
       "Leon Wyczółkowski tak naprawdę... nigdy nie mieszkał w tym domu! Mieszkał w dworku w pobliskim Gościeradzu. Ten budynek na Wyspie Młyńskiej pełni funkcję muzeum, ponieważ artysta przed śmiercią przekazał miastu Bydgoszcz ogromną kolekcję swoich prac (obrazy, grafiki, meble).",
   },
   {
+    id: 5,
     type: "task",
+    lat: 53.123736,
+    long: 17.998304,
     task: "Most Miłości Jana Kiepury. Zrób sobie wspólne zdjęcie.",
     curiocity:
       "Do wieszania swoich kłódek mieszkańcy upatrzyli sobie Most Kiepury prowadzący na Wyspę Młyńską, jednak z przyczyn technicznych kłódki te musiały zostać zdjęte. Powstała za to specjalnie na tę okazję przygotowana metalowa instalacja przy bulwarach.",
   },
   {
+    id: 6,
     type: "task",
+    lat: 53.126262,
+    long: 18.004072,
     task: "Zapraszamy was na kawę. Polecana kawiarnia w okolicy to: Bromberg Kaffee – bydgoska palarnia kawy.",
     curiocity:
       "Nasze ziarna są wypalane metodą rzemieślniczą, w małych partiach. To pozwala nam kontrolować każdy etap i wydobyć pełnię smaku – głęboki, czysty profil, bez goryczy i przesadnej kwasowości.",

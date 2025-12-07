@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' show json;
 
 import 'package:zakochaj_sie_w_bydgoszczy_fe/quiz_view.dart';
+import 'package:zakochaj_sie_w_bydgoszczy_fe/api.dart';
 
 import 'main_app_bar.dart';
 // Import your quiz screen
@@ -19,6 +20,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
+  final ApiClient _apiClient = ApiClient();
 
   // Center of Bydgoszcz
   final LatLng _center = LatLng(53.1235, 18.0084);
@@ -27,30 +29,37 @@ class _MapScreenState extends State<MapScreen> {
   List<LatLng> _routePoints = [];
   bool _isLoadingRoute = true;
 
-  // Define waypoints with coordinates (rearranged for better route flow)
-  final List<Map<String, dynamic>> _waypoints = [
-    {
-      'name': 'Old Market Square',
-      'location': LatLng(53.1236, 18.0067),
-    },
-    {
-      'name': 'Cathedral',
-      'location': LatLng(53.1215, 18.0125),
-    },
-    {
-      'name': 'Mill Island',
-      'location': LatLng(53.1267, 18.0089),
-    },
-    {
-      'name': 'Opera Nova',
-      'location': LatLng(53.1198, 18.0053),
-    },
-  ];
+  // Store waypoints from API
+  List<Map<String, dynamic>> _waypoints = [];
+  bool _isLoadingWaypoints = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchRoute();
+    _loadScenarioSteps();
+  }
+
+  @override
+  void dispose() {
+    _apiClient.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadScenarioSteps() async {
+    // Assuming scenario ID 1 - you might want to make this configurable
+    final response = await _apiClient.api.getScenarioSteps(1);
+    
+    if (response.body != null) {
+      setState(() {
+        _waypoints = response.body!.map((step) => {
+          'id': step.id,
+          'location': LatLng(step.lat, step.long),
+        }).toList();
+        _isLoadingWaypoints = false;
+      });
+      
+      _fetchRoute();
+    }
   }
 
   Future<void> _fetchRoute() async {
@@ -118,11 +127,6 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Use route points if available, otherwise use straight lines
-    final List<LatLng> pathPoints = _routePoints.isNotEmpty
-        ? _routePoints
-        : _waypoints.map((wp) => wp['location'] as LatLng).toList();
-
     return Scaffold(
       backgroundColor: const Color(0xFFdbdad8),
       appBar: buildCustomAppBar(
@@ -132,7 +136,32 @@ class _MapScreenState extends State<MapScreen> {
         showRefreshButton: false,
         // cubit is intentionally null/omitted here, so the back button uses Navigator.pop()
       ),
-      body: GestureDetector(
+      body: _isLoadingWaypoints
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text(
+                    'Loading waypoints...',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+            )
+          : _buildMapView(),
+      floatingActionButton: _isLoadingWaypoints ? null : _buildFloatingActionButtons(),
+    );
+  }
+
+  Widget _buildMapView() {
+    // Use route points if available, otherwise use straight lines
+    final List<LatLng> pathPoints = _routePoints.isNotEmpty
+        ? _routePoints
+        : _waypoints.map((wp) => wp['location'] as LatLng).toList();
+
+    return GestureDetector(
         onScaleStart: (_) {},
         onScaleUpdate: (_) {},
         onScaleEnd: (_) {},
@@ -243,50 +272,52 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ],
         ),
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          // Zoom In Button
-          FloatingActionButton(
-            heroTag: 'zoom_in',
-            mini: true,
-            onPressed: () {
-              final currentZoom = _mapController.camera.zoom;
-              _mapController.move(
-                _mapController.camera.center,
-                currentZoom + 1,
-              );
-            },
-            child: const Icon(Icons.add),
-          ),
-          const SizedBox(height: 8),
+      );
+  }
 
-          // Zoom Out Button
-          FloatingActionButton(
-            heroTag: 'zoom_out',
-            mini: true,
-            onPressed: () {
-              final currentZoom = _mapController.camera.zoom;
-              _mapController.move(
-                _mapController.camera.center,
-                currentZoom - 1,
-              );
-            },
-            child: const Icon(Icons.remove),
-          ),
-          const SizedBox(height: 8),
+  Widget _buildFloatingActionButtons() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        // Zoom In Button
+        FloatingActionButton(
+          heroTag: 'zoom_in',
+          mini: true,
+          onPressed: () {
+            final currentZoom = _mapController.camera.zoom;
+            _mapController.move(
+              _mapController.camera.center,
+              currentZoom + 1,
+            );
+          },
+          child: const Icon(Icons.add),
+        ),
+        const SizedBox(height: 8),
 
-          // Recenter Button
-          FloatingActionButton(
-            heroTag: 'recenter',
-            onPressed: () {
-              _mapController.move(_center, 14.0);
-            },
-            child: const Icon(Icons.my_location),
-          ),
-        ],
-      ),
+        // Zoom Out Button
+        FloatingActionButton(
+          heroTag: 'zoom_out',
+          mini: true,
+          onPressed: () {
+            final currentZoom = _mapController.camera.zoom;
+            _mapController.move(
+              _mapController.camera.center,
+              currentZoom - 1,
+            );
+          },
+          child: const Icon(Icons.remove),
+        ),
+        const SizedBox(height: 8),
+
+        // Recenter Button
+        FloatingActionButton(
+          heroTag: 'recenter',
+          onPressed: () {
+            _mapController.move(_center, 14.0);
+          },
+          child: const Icon(Icons.my_location),
+        ),
+      ],
     );
   }
 }

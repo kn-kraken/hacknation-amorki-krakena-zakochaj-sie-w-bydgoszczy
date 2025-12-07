@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/header.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/match.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/swapper.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/date_page.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/preferences/preferences.dart';
+import 'package:zakochaj_sie_w_bydgoszczy_fe/api.dart';
 import '../buttons/stamped_button.dart';
 import '../event_tile.dart';
 import '../main_app_bar.dart';
@@ -105,38 +107,58 @@ class InitialPage extends StatelessWidget {
 }
 
 // Updated ListDatesPage with DateStampTile
-class ListDatesPage extends StatelessWidget {
+class ListDatesPage extends StatefulWidget {
   const ListDatesPage({super.key});
 
-  final List<Map<String, String>> dates = const [
-    {
-      'id': '1',
-      'title': 'Coffee Date',
-      'desc':
-          'Quick and casualQuick and casualQuick and casualQuick and casualQuick and casual',
-      // 'image': 'assets/images/coffee.jpg', // Add your image path
-    },
-    {
-      'id': '2',
-      'title': 'Dinner & a Movie',
-      'desc': 'A classic choice',
-      // 'image': 'assets/images/dinner.jpg',
-    },
-  ];
+  @override
+  State<ListDatesPage> createState() => _ListDatesPageState();
+}
+
+class _ListDatesPageState extends State<ListDatesPage> {
+  List<ScenarioInfoRes> scenarios = [];
+  bool isLoading = true;
+  String? error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadScenarios();
+  }
+
+  Future<void> _loadScenarios() async {
+    final apiClient = context.read<ApiClient>();
+    final response = await apiClient.api.getScenarios();
+
+    if (!response.isSuccessful && response.body != null) return;
+
+    setState(() {
+      scenarios = response.body!;
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<PreferencesCubit>();
+
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (error != null) {
+      return Center(child: Text(error!));
+    }
+
     return ListView.builder(
-      itemCount: dates.length,
+      itemCount: scenarios.length,
       padding: const EdgeInsets.only(top: 10, bottom: 20),
       itemBuilder: (context, index) {
-        final date = dates[index];
+        final scenario = scenarios[index];
         return EventTile(
-          title: date['title']!,
-          description: date['desc']!,
-          imageUrl: date['image'],
-          onTap: () => cubit.selectDate(date['id']!),
+          title: scenario.title,
+          description: scenario.description,
+          imageUrl: null, // ScenarioInfoRes doesn't have image field
+          onTap: () => cubit.selectDate(scenario.id.toString()),
         );
       },
     );
