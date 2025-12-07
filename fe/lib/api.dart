@@ -47,6 +47,85 @@ class Item {
   Map<String, dynamic> toJson() => _$ItemToJson(this);
 }
 
+@JsonSerializable()
+class ScenarioInfoRes {
+  final int id;
+  final String title;
+  final String description;
+
+  ScenarioInfoRes({required this.id, required this.title, required this.description});
+
+  factory ScenarioInfoRes.fromJson(Map<String, dynamic> json) => _$ScenarioInfoResFromJson(json);
+  Map<String, dynamic> toJson() => _$ScenarioInfoResToJson(this);
+}
+
+@JsonSerializable()
+class StepInfoRes {
+  final int id;
+  final double lat;
+  final double long;
+
+  StepInfoRes({required this.id, required this.lat, required this.long});
+
+  factory StepInfoRes.fromJson(Map<String, dynamic> json) => _$StepInfoResFromJson(json);
+  Map<String, dynamic> toJson() => _$StepInfoResToJson(this);
+}
+
+sealed class Step {
+  factory Step.fromJson(Map<String, dynamic> json) => switch (json["type"]) {
+    "question" => Question.fromJson(json),
+    "task" => Task.fromJson(json),
+  };
+}
+
+@JsonSerializable()
+class Question extends Step {
+  final int id;
+  final String type;
+  final double lat;
+  final double long;
+  final String question;
+  final List<String> answers;
+  final int validAnswerIndex;
+  final String curiocity;
+
+  Question({
+    required this.id,
+    required this.type,
+    required this.lat,
+    required this.long,
+    required this.question,
+    required this.answers,
+    required this.validAnswerIndex,
+    required this.curiocity,
+  });
+
+  factory Question.fromJson(Map<String, dynamic> json) => _$QuestionFromJson(json);
+  Map<String, dynamic> toJson() => _$QuestionToJson(this);
+}
+
+@JsonSerializable()
+class Task extends Step {
+  final int id;
+  final String type;
+  final double lat;
+  final double long;
+  final String task;
+  final String curiocity;
+
+  Task({
+    required this.id,
+    required this.type,
+    required this.lat,
+    required this.long,
+    required this.task,
+    required this.curiocity,
+  });
+
+  factory Task.fromJson(Map<String, dynamic> json) => _$TaskFromJson(json);
+  Map<String, dynamic> toJson() => _$TaskToJson(this);
+}
+
 @ChopperApi()
 abstract class ApiService extends ChopperService {
   static ApiService create([ChopperClient? client]) => _$ApiService(client);
@@ -80,6 +159,19 @@ abstract class ApiService extends ChopperService {
   // Blobs endpoints
   @GET(path: '/blobs/{hash}')
   Future<Response> getBlob(@Path('hash') String hash);
+
+  // Scenarios endpoints
+  @GET(path: '/scenarios/')
+  Future<Response<List<ScenarioInfoRes>>> getScenarios();
+
+  @GET(path: '/scenarios/{id}/steps/')
+  Future<Response<List<StepInfoRes>>> getScenarioSteps(@Path('id') int id);
+
+  @GET(path: '/scenarios/{id}/steps/{stepId}')
+  Future<Response<Step>> getStep(
+    @Path('id') int id,
+    @Path('stepId') int stepId,
+  );
 }
 
 class ApiConverter extends JsonConverter {
@@ -111,6 +203,11 @@ class ApiConverter extends JsonConverter {
       UserRes => UserRes.fromJson(jsonBody),
       SwipeRes => SwipeRes.fromJson(jsonBody),
       Item => Item.fromJson(jsonBody),
+      ScenarioInfoRes => ScenarioInfoRes.fromJson(jsonBody),
+      StepInfoRes => StepInfoRes.fromJson(jsonBody),
+      Question => Question.fromJson(jsonBody),
+      Task => Task.fromJson(jsonBody),
+      Step => Step.fromJson(jsonBody),
       _ => super.convertResponse<BodyType, SingleItemType>(response),
     } as BodyType;
 
