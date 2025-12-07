@@ -105,9 +105,24 @@ async def read_next(
 
     other = next(unconsidered, None)
     if other is None:
+        reset_links(login=my_login, user_links=user_links)
         raise HTTPException(404, "Not found")
 
     return UserRes.from_domain(other, request.base_url)
+
+
+def reset_links(
+    login: str,
+    user_links: Collection[UserLink],
+):
+    _ = user_links.update_many(
+        {"login_1": login, "approved_1": {"$ne": None}},
+        {"$set": {"approved_1": None}},
+    )
+    _ = user_links.update_many(
+        {"login_2": login, "approved_2": {"$ne": None}},
+        {"$set": {"approved_2": None}},
+    )
 
 
 @router.put("/users/{login}/swipe")

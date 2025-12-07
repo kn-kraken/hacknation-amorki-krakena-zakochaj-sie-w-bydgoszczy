@@ -124,7 +124,7 @@ class ApiClient {
 
   ApiClient({String? baseUrl}) {
     _chopperClient = ChopperClient(
-      baseUrl: Uri.parse(baseUrl ?? 'http://192.168.1.11:8000'),
+      baseUrl: Uri.parse(baseUrl ?? 'http://192.168.1.10:8000'),
       services: [ApiService.create()],
       converter: const ApiConverter(),
       interceptors: [HttpLoggingInterceptor(), HeadersInterceptor()],
