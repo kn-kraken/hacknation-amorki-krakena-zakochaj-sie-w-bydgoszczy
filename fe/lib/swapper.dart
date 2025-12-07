@@ -114,7 +114,7 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
         );
         preferences.emit(newState);
       }
-      
+
       emit(
         state.copyWith(
           likedCards: [...state.likedCards, event.card],
@@ -130,7 +130,7 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
 
     on<SwipeLeft>((event, emit) async {
       await apiService.swipeUser(event.card.login, false);
-      
+
       emit(
         state.copyWith(
           dislikedCards: [...state.dislikedCards, event.card],
@@ -158,7 +158,7 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
     });
 
     // Initialize with loading first user
-    // add(LoadNextUser());
+    add(LoadNextUser());
   }
 }
 
@@ -171,55 +171,55 @@ class SwipeCardsScreenContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-        children: [
-          Expanded(
-            child: BlocBuilder<SwipeBloc, SwipeState>(
-              builder: (context, state) {
-                if (!state.hasMoreCards) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.check_circle,
-                          size: 80,
-                          color: Colors.green,
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'No more cards!',
-                          style: TextStyle(fontSize: 24),
-                        ),
-                        const SizedBox(height: 8),
-                        Text('Liked: ${state.likedCards.length}'),
-                        Text('Disliked: ${state.dislikedCards.length}'),
-                      ],
-                    ),
-                  );
-                }
-
-                return Stack(
-                  children: [
-                    if (state.currentIndex + 1 < state.cards.length)
-                      _buildCard(
-                        context,
-                        state.cards[state.currentIndex + 1],
-                        false,
+      children: [
+        Expanded(
+          child: BlocBuilder<SwipeBloc, SwipeState>(
+            builder: (context, state) {
+              if (!state.hasMoreCards) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.check_circle,
+                        size: 80,
+                        color: Colors.green,
                       ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'No more cards!',
+                        style: TextStyle(fontSize: 24),
+                      ),
+                      const SizedBox(height: 8),
+                      Text('Liked: ${state.likedCards.length}'),
+                      Text('Disliked: ${state.dislikedCards.length}'),
+                    ],
+                  ),
+                );
+              }
+
+              return Stack(
+                children: [
+                  if (state.currentIndex + 1 < state.cards.length)
                     _buildCard(
                       context,
-                      state.currentCard!,
-                      true,
-                      key: ValueKey(state.currentCard!.login),
+                      state.cards[state.currentIndex + 1],
+                      false,
                     ),
-                  ],
-                );
-              },
-            ),
+                  _buildCard(
+                    context,
+                    state.currentCard!,
+                    true,
+                    key: ValueKey(state.currentCard!.login),
+                  ),
+                ],
+              );
+            },
           ),
-          _buildActionButtons(context),
-        ],
-      );
+        ),
+        _buildActionButtons(context),
+      ],
+    );
   }
 
   Widget _buildCard(
