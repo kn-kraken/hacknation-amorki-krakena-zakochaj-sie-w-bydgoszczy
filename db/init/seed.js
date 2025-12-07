@@ -172,6 +172,7 @@ db.scenarios.insertMany([
   {
     id: 1,
     title: "Miłość płynąca z Nurtem Brdy",
+    image_hash: blobs[38].hash,
     description:
       "Pozwólcie, by nurt Brdy poprowadził Was przez najpiękniejsze zakątki historycznego centrum Bydgoszczy. Czekają na Was zagadki i piękne widoki.",
     steps: steps,
@@ -179,6 +180,7 @@ db.scenarios.insertMany([
   {
     id: 2,
     title: "Królewska Obietnica Kazimierza",
+    image_hash: blobs[39].hash,
     description:
       "„Królewska Obietnica Kazimierza” to miejska trasa prowadząca przez kluczowe miejsca średniowiecznej Bydgoszczy, opowiadająca o nadaniu jej praw miejskich przez Kazimierza Wielkiego.",
     steps: steps,
@@ -186,6 +188,7 @@ db.scenarios.insertMany([
   {
     id: 3,
     title: "Szmaragdowy Tunel",
+    image_hash: blobs[40].hash,
     description:
       "Zostawcie za sobą zgiełk miasta i wejdźcie do zielonego korytarza, gdzie czas zdaje się płynąć własnym, leniwym rytmem. Tutaj, w cieniu potężnych, stuletnich drzew, woda staje się lustrem dla historii.",
     steps: steps,

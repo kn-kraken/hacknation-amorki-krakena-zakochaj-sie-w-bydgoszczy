@@ -45,7 +45,7 @@ class PreferencesScreen extends StatelessWidget {
   }
 
   String getTitle(PreferencesStatus status) {
-    switch(status) {
+    switch (status) {
       case PreferencesStatus.initial:
         return '';
       case PreferencesStatus.listDatesShouldSwipe:
@@ -80,7 +80,8 @@ class PreferencesScreen extends StatelessWidget {
 class InitialPage extends StatelessWidget {
   const InitialPage({super.key});
   static const String _kStampFramePath = 'assets/stamp.svg';
-  static const String _kDecorativePngPath = 'assets/your_image.png'; // Replace with your PNG path
+  static const String _kDecorativePngPath =
+      'assets/your_image.png'; // Replace with your PNG path
   static const Color _kBackgroundColor = Color(0xFFdbdad8);
 
   @override
@@ -100,7 +101,8 @@ class InitialPage extends StatelessWidget {
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
+                  crossAxisAlignment:
+                      CrossAxisAlignment.center, // Center horizontally
                   children: [
                     const Text(
                       "Tutaj historia łączy…\n a my podpowiadamy z kim",
@@ -187,7 +189,8 @@ class _ListDatesPageState extends State<ListDatesPage> {
         return EventTile(
           title: scenario.title,
           description: scenario.description,
-          imageUrl: null, // ScenarioInfoRes doesn't have image field
+          imageUrl:
+              scenario.imageUrl, // ScenarioInfoRes doesn't have image field
           onTap: () => cubit.selectDate(scenario.id.toString()),
         );
       },

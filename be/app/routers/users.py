@@ -63,14 +63,6 @@ def get_me(
     return user
 
 
-@router.get("/users/")
-async def read_users(
-    users: Annotated[Collection[User], Depends(get_user_db)],
-    request: Request,
-) -> list[UserRes]:
-    return [UserRes.from_domain(user, request.base_url) for user in users.find()]
-
-
 @router.get("/users/me")
 async def read_me(
     me: Annotated[User, Depends(get_me)],

@@ -15,6 +15,7 @@ router = APIRouter(tags=["scenarios"])
 class Scenario(TypedDict):
     id: int
     title: str
+    image_hash: str
     description: str
     steps: list[Step]
 
@@ -81,13 +82,15 @@ def step_to_res(step: Step, base_url: URL) -> StepRes:
 class ScenarioInfoRes(BaseModel):
     id: int
     title: str
+    image_url: str
     description: str
 
     @classmethod
-    def from_domain(cls, scenario: Scenario):
+    def from_domain(cls, scenario: Scenario, base_url: URL):
         return cls(
             id=scenario["id"],
             title=scenario["title"],
+            image_url=f"{base_url}blobs/{scenario['image_hash']}",
             description=scenario["description"],
         )
 
@@ -113,8 +116,12 @@ def get_scenarios_db(db: Annotated[Db, Depends(get_db)]) -> Collection[Scenario]
 @router.get("/scenarios/")
 async def read_scenarios(
     scenarios: Annotated[Collection[Scenario], Depends(get_scenarios_db)],
+    request: Request,
 ) -> list[ScenarioInfoRes]:
-    return [ScenarioInfoRes.from_domain(scenario) for scenario in scenarios.find()]
+    return [
+        ScenarioInfoRes.from_domain(scenario, request.base_url)
+        for scenario in scenarios.find()
+    ]
 
 
 @router.get("/scenarios/{id}/steps/")
