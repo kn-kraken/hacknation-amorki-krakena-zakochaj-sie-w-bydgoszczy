@@ -83,6 +83,16 @@ class InitialPage extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    const Text(
+                      "Tutaj historia łączy… a my podpowiadamy z kim.",
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF6B1D27),
+                        letterSpacing: 2,
+                      ),
+                    ),
+                    const SizedBox(height: 30),
                     Header(text: 'CZEGO DZIŚ SZUKASZ'),
                     StampedButton(
                       text: 'SZUKAM PARY',

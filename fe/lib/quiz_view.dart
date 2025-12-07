@@ -235,7 +235,7 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
 
             FunFactCard(
               funFact: question.curiocity,
-              wikipediaUrl: 'https://en.wikipedia.org/wiki/Bydgoszcz', // Default fallback
+              wikipediaUrl: 'https://visitbydgoszcz.pl/pl/', // Default fallback
             ),
           ],
         ),
