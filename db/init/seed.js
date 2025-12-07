@@ -97,37 +97,47 @@ db.user_links.insertMany([
 
 steps = [
   {
+    type: "question",
     question:
       "Zaobserwuj rzeźbę przy moście. Zgadnij nazwę rzeźby, którą widzisz:",
     answers: ["Akrobata", "Przechodzący przez rzekę", "Dzień w chmurach"],
+    validAnswerIndex: 1,
     curiocity:
       "Czy wiesz, że ta rzeźba to genialne zastosowanie fizyki? Środek ciężkości figury znajduje się poniżej liny, na której wisi. Dzięki temu „Przechodzący” utrzymuje równowagę sam z siebie i nie przewróci go nawet silny wiatr!",
   },
   {
+    type: "question",
     question: "Katedra Bydgoska. Zgadnij rok budowy:",
     answers: ["1466", "1604", "1308"],
+    validAnswerIndex: 0,
     curiocity:
       "Katedra jest najstarszym budynkiem w Bydgoszczy. W trakcie prac konserwatorskich prowadzonych w bydgoskiej katedrze archeolodzy odnaleźli prawdziwy skarb!",
   },
   {
+    type: "question",
     question: "Wieża ciśnień. Zgadnij wysokość zabytku:",
     answers: ["21 m", "45 m", "32 m"],
+    validAnswerIndex: 1,
     curiocity:
       "Kiedyś wewnątrz znajdował się gigantyczny zbiornik, który mieścił aż 1260 m³ wody – to tyle, co ok. 4000 pełnych wanien!",
   },
   {
+    type: "question",
     question:
       "Wyspa. Znajdź dom Dom Leona Wyczółkowskiego. W jakim stylu powstał ten dom?",
     answers: ["Gotyckim", "Neoromantycznym", "Romańskim"],
+    validAnswerIndex: 1,
     curiocity:
       "Leon Wyczółkowski tak naprawdę... nigdy nie mieszkał w tym domu! Mieszkał w dworku w pobliskim Gościeradzu. Ten budynek na Wyspie Młyńskiej pełni funkcję muzeum, ponieważ artysta przed śmiercią przekazał miastu Bydgoszcz ogromną kolekcję swoich prac (obrazy, grafiki, meble).",
   },
   {
+    type: "task",
     task: "Most Miłości Jana Kiepury. Zrób sobie wspólne zdjęcie.",
     curiocity:
       "Do wieszania swoich kłódek mieszkańcy upatrzyli sobie Most Kiepury prowadzący na Wyspę Młyńską, jednak z przyczyn technicznych kłódki te musiały zostać zdjęte. Powstała za to specjalnie na tę okazję przygotowana metalowa instalacja przy bulwarach.",
   },
   {
+    type: "task",
     task: "Zapraszamy was na kawę. Polecana kawiarnia w okolicy to: Bromberg Kaffee – bydgoska palarnia kawy.",
     curiocity:
       "Nasze ziarna są wypalane metodą rzemieślniczą, w małych partiach. To pozwala nam kontrolować każdy etap i wydobyć pełnię smaku – głęboki, czysty profil, bez goryczy i przesadnej kwasowości.",
@@ -136,18 +146,21 @@ steps = [
 
 db.scenarios.insertMany([
   {
+    id: 1,
     title: "Miłość płynąca z Nurtem Brdy",
     description:
       "Pozwólcie, by nurt Brdy poprowadził Was przez najpiękniejsze zakątki historycznego centrum Bydgoszczy. Czekają na Was zagadki i piękne widoki.",
     steps: steps,
   },
   {
+    id: 2,
     title: "Królewska Obietnica Kazimierza",
     description:
       "„Królewska Obietnica Kazimierza” to miejska trasa prowadząca przez kluczowe miejsca średniowiecznej Bydgoszczy, opowiadająca o nadaniu jej praw miejskich przez Kazimierza Wielkiego.",
     steps: steps,
   },
   {
+    id: 3,
     title: "Szmaragdowy Tunel",
     description:
       "Zostawcie za sobą zgiełk miasta i wejdźcie do zielonego korytarza, gdzie czas zdaje się płynąć własnym, leniwym rytmem. Tutaj, w cieniu potężnych, stuletnich drzew, woda staje się lustrem dla historii.",
