@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:html' as html;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class QuizViewScreen extends StatefulWidget {
   final int locationIndex;
@@ -13,6 +14,8 @@ class QuizViewScreen extends StatefulWidget {
 class _QuizViewScreenState extends State<QuizViewScreen> {
   int? _selectedAnswer;
   bool _hasAnswered = false;
+  int _globalScore = 0;
+  bool _isCompleted = false;
 
   // Global owl score storage key
   static const String _scoreKey = 'global_owl_score';
@@ -77,99 +80,131 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
     _loadQuizState();
   }
 
-  int _getGlobalScore() {
-    final stored = html.window.localStorage[_scoreKey];
-    return stored != null ? int.tryParse(stored) ?? 0 : 0;
+  Future<int> _getGlobalScore() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_scoreKey) ?? 0;
   }
 
-  void _setGlobalScore(int score) {
-    html.window.localStorage[_scoreKey] = score.toString();
+  Future<void> _setGlobalScore(int score) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_scoreKey, score);
   }
 
-  bool _isQuizCompleted() {
-    final completed = html.window.localStorage[_completedQuizzesKey] ?? '';
+  Future<bool> _isQuizCompleted() async {
+    final prefs = await SharedPreferences.getInstance();
+    final completed = prefs.getString(_completedQuizzesKey) ?? '';
     return completed.contains('quiz_${widget.locationIndex}');
   }
 
-  void _markQuizCompleted() {
-    final completed = html.window.localStorage[_completedQuizzesKey] ?? '';
+  Future<void> _markQuizCompleted() async {
+    final prefs = await SharedPreferences.getInstance();
+    final completed = prefs.getString(_completedQuizzesKey) ?? '';
     final quizzes = completed.isEmpty ? [] : completed.split(',');
     if (!quizzes.contains('quiz_${widget.locationIndex}')) {
       quizzes.add('quiz_${widget.locationIndex}');
-      html.window.localStorage[_completedQuizzesKey] = quizzes.join(',');
+      await prefs.setString(_completedQuizzesKey, quizzes.join(','));
     }
   }
 
-  void _loadQuizState() {
-    if (_isQuizCompleted()) {
+  Future<void> _loadQuizState() async {
+    final isCompleted = await _isQuizCompleted();
+    final globalScore = await _getGlobalScore();
+    
+    if (isCompleted) {
+      final prefs = await SharedPreferences.getInstance();
+      final savedAnswer = prefs.getString('quiz_${widget.locationIndex}_answer');
       setState(() {
         _hasAnswered = true;
-        // Load saved answer if available
-        final savedAnswer =
-            html.window.localStorage['quiz_${widget.locationIndex}_answer'];
         _selectedAnswer = savedAnswer != null
             ? int.tryParse(savedAnswer)
             : null;
+        _isCompleted = isCompleted;
+        _globalScore = globalScore;
+      });
+    } else {
+      setState(() {
+        _isCompleted = isCompleted;
+        _globalScore = globalScore;
       });
     }
   }
 
-  void _saveQuizAnswer(int answer) {
-    html.window.localStorage['quiz_${widget.locationIndex}_answer'] = answer
-        .toString();
+  Future<void> _saveQuizAnswer(int answer) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('quiz_${widget.locationIndex}_answer', answer.toString());
   }
 
-  void _checkAnswer(int selectedIndex) {
-    if (_isQuizCompleted()) return; // Prevent re-answering
+  Future<void> _checkAnswer(int selectedIndex) async {
+    if (_isCompleted) return; // Prevent re-answering
 
     setState(() {
       _selectedAnswer = selectedIndex;
       _hasAnswered = true;
+    });
 
-      final correctAnswer = _quizData[widget.locationIndex]['correctAnswer'];
-      if (selectedIndex == correctAnswer) {
-        // Add 1 to global score
-        final currentScore = _getGlobalScore();
-        _setGlobalScore(currentScore + 1);
-      }
+    final correctAnswer = _quizData[widget.locationIndex]['correctAnswer'];
+    if (selectedIndex == correctAnswer) {
+      // Add 1 to global score
+      final currentScore = await _getGlobalScore();
+      final newScore = currentScore + 1;
+      await _setGlobalScore(newScore);
+      setState(() {
+        _globalScore = newScore;
+      });
+    }
 
-      // Save this quiz as completed
-      _markQuizCompleted();
-      _saveQuizAnswer(selectedIndex);
+    // Save this quiz as completed
+    await _markQuizCompleted();
+    await _saveQuizAnswer(selectedIndex);
+    
+    setState(() {
+      _isCompleted = true;
     });
   }
 
-  void _showCompletionMessage() {
-    final globalScore = _getGlobalScore();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Text('🦉', style: TextStyle(fontSize: 24)),
-            const SizedBox(width: 12),
-            Text(
-              'Global Owl Score: $globalScore',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ],
+  Future<void> _showCompletionMessage() async {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Text('🦉', style: TextStyle(fontSize: 24)),
+              const SizedBox(width: 12),
+              Text(
+                'Global Owl Score: $_globalScore',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 3),
         ),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+      );
+    }
   }
 
   Future<void> _launchWikipedia() async {
     final url = _quizData[widget.locationIndex]['wikipediaUrl'];
-    html.window.open(url, '_blank');
+    final uri = Uri.parse(url);
+    
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not open Wikipedia link'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final currentQuiz = _quizData[widget.locationIndex];
     final correctAnswerIndex = currentQuiz['correctAnswer'] as int;
-    final globalScore = _getGlobalScore();
-    final isCompleted = _isQuizCompleted();
 
     return Scaffold(
       appBar: AppBar(title: Text(currentQuiz['name']), elevation: 2),
@@ -191,7 +226,7 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+                    colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
                   ),
                 ),
                 alignment: Alignment.bottomLeft,
@@ -219,12 +254,12 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: isCompleted
-                          ? Colors.green.withOpacity(0.2)
-                          : Colors.amber.withOpacity(0.2),
+                      color: _isCompleted
+                          ? Colors.green.withValues(alpha: 0.2)
+                          : Colors.amber.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isCompleted ? Colors.green : Colors.amber,
+                        color: _isCompleted ? Colors.green : Colors.amber,
                         width: 2,
                       ),
                     ),
@@ -234,13 +269,13 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
                         const Text('🦉', style: TextStyle(fontSize: 24)),
                         const SizedBox(width: 8),
                         Text(
-                          'Global Owl Score: $globalScore',
+                          'Global Owl Score: $_globalScore',
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        if (isCompleted) ...[
+                        if (_isCompleted) ...[
                           const SizedBox(width: 8),
                           const Icon(
                             Icons.check_circle,
@@ -258,10 +293,10 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: Colors.blue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.blue.withOpacity(0.3),
+                        color: Colors.blue.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -318,10 +353,10 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
 
                     if (_hasAnswered) {
                       if (isCorrect) {
-                        backgroundColor = Colors.green.withOpacity(0.2);
+                        backgroundColor = Colors.green.withValues(alpha: 0.2);
                         borderColor = Colors.green;
                       } else if (isSelected && !isCorrect) {
-                        backgroundColor = Colors.red.withOpacity(0.2);
+                        backgroundColor = Colors.red.withValues(alpha: 0.2);
                         borderColor = Colors.red;
                       }
                     }
@@ -329,11 +364,11 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: InkWell(
-                        onTap: (_hasAnswered || isCompleted)
+                        onTap: (_hasAnswered || _isCompleted)
                             ? null
-                            : () {
-                                _checkAnswer(index);
-                                _showCompletionMessage();
+                            : () async {
+                                await _checkAnswer(index);
+                                await _showCompletionMessage();
                               },
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
@@ -389,11 +424,11 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
                   const SizedBox(height: 24),
 
                   // Completion message
-                  if (isCompleted)
+                  if (_isCompleted)
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
+                        color: Colors.green.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.green, width: 2),
                       ),
@@ -419,7 +454,7 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
                       ),
                     ),
 
-                  if (isCompleted) const SizedBox(height: 24),
+                  if (_isCompleted) const SizedBox(height: 24),
 
                   // Wikipedia Link Button
                   OutlinedButton.icon(

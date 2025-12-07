@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Annotated, TypedDict
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi.datastructures import URL
 from pydantic import BaseModel
 from pymongo.database import Collection
 
@@ -23,11 +24,11 @@ class UserRes(BaseModel):
     image_url: str
 
     @classmethod
-    def from_domain(cls, user: User) -> UserRes:
+    def from_domain(cls, user: User, base_url: URL) -> UserRes:
         return cls(
             login=user["login"],
             name=user["name"],
-            image_url=f"/blobs/{user["image_hash"]}",
+            image_url=f"{base_url}blobs/{user["image_hash"]}",
         )
 
 
@@ -59,15 +60,17 @@ def get_me(
 @router.get("/users/")
 async def read_users(
     users: Annotated[Collection[User], Depends(get_user_db)],
+    request: Request,
 ) -> list[UserRes]:
-    return [UserRes.from_domain(user) for user in users.find()]
+    return [UserRes.from_domain(user, request.base_url) for user in users.find()]
 
 
 @router.get("/users/me")
 async def read_me(
     me: Annotated[User, Depends(get_me)],
+    request: Request,
 ) -> UserRes:
-    return UserRes.from_domain(me)
+    return UserRes.from_domain(me, request.base_url)
 
 
 @router.get("/users/next")
@@ -75,6 +78,7 @@ async def read_next(
     me: Annotated[User, Depends(get_me)],
     users: Annotated[Collection[User], Depends(get_user_db)],
     user_links: Annotated[Collection[UserLink], Depends(get_user_link_db)],
+    request: Request,
 ) -> UserRes:
     my_login = me["login"]
     considered = user_links.find(
@@ -101,9 +105,24 @@ async def read_next(
 
     other = next(unconsidered, None)
     if other is None:
+        reset_links(login=my_login, user_links=user_links)
         raise HTTPException(404, "Not found")
 
-    return UserRes.from_domain(other)
+    return UserRes.from_domain(other, request.base_url)
+
+
+def reset_links(
+    login: str,
+    user_links: Collection[UserLink],
+):
+    _ = user_links.update_many(
+        {"login_1": login, "approved_1": {"$ne": None}},
+        {"$set": {"approved_1": None}},
+    )
+    _ = user_links.update_many(
+        {"login_2": login, "approved_2": {"$ne": None}},
+        {"$set": {"approved_2": None}},
+    )
 
 
 @router.put("/users/{login}/swipe")
