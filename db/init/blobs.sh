@@ -1,7 +1,7 @@
 #!/bin/sh
 
 blobs=""
-for blob in /docker-entrypoint-initdb.d/blobs/*.jpeg; do
+for blob in /docker-entrypoint-initdb.d/blobs/*; do
   b64="$(base64 -w0 <"$blob")"
   hash=$(echo $b64 | md5sum | cut -d ' ' -f 1)
   cmd="{hash: '$hash', data: '$b64'},"
