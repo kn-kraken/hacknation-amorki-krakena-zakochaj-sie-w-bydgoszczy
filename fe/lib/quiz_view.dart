@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/quiz/fun_fact.dart';
+import 'package:zakochaj_sie_w_bydgoszczy_fe/api.dart' as api;
 import 'header.dart';
 import 'main_app_bar.dart';
 
@@ -19,67 +20,43 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
   bool _hasAnswered = false;
   int _globalScore = 0;
   bool _isCompleted = false;
+  bool _isLoading = true;
+  api.Step? _stepData;
+  final api.ApiClient _apiClient = api.ApiClient();
 
   static const String _scoreKey = 'global_owl_score';
   static const String _completedQuizzesKey = 'completed_quizzes';
 
-  final List<Map<String, dynamic>> _quizData = [
-    {
-      'name': 'Old Market Square',
-      'imageUrl': 'https://picsum.photos/400/300?random=1',
-      'funFact':
-      'The Old Market Square in Bydgoszcz was established in the 14th century and served as the heart of medieval trade routes.',
-      'question': 'When was the Old Market Square in Bydgoszcz established?',
-      'options': [
-        '12th century',
-        '14th century',
-        '16th century',
-        '18th century',
-      ],
-      'correctAnswer': 1,
-      'wikipediaUrl': 'https://en.wikipedia.org/wiki/Bydgoszcz_Old_Town',
-    },
-    {
-      'name': 'Cathedral Basilica',
-      'imageUrl': 'https://picsum.photos/400/300?random=4',
-      'funFact':
-      'The Bydgoszcz Cathedral was originally built as a parish church in the 15th century and became a cathedral in 2004.',
-      'question': 'In what year did the church become a cathedral?',
-      'options': ['1945', '1989', '2004', '2010'],
-      'correctAnswer': 2,
-      'wikipediaUrl': 'https://en.wikipedia.org/wiki/Bydgoszcz_Cathedral',
-    },
-    {
-      'name': 'Mill Island',
-      'imageUrl': 'https://picsum.photos/400/300?random=2',
-      'funFact':
-      'Mill Island has been home to grain mills since medieval times, utilizing the Brda River\'s water power for centuries.',
-      'question': 'What was Mill Island historically used for?',
-      'options': [
-        'Fishing harbor',
-        'Military fortress',
-        'Grain mills',
-        'Royal palace',
-      ],
-      'correctAnswer': 2,
-      'wikipediaUrl': 'https://en.wikipedia.org/wiki/Mill_Island,_Bydgoszcz',
-    },
-    {
-      'name': 'Opera Nova',
-      'imageUrl': 'https://picsum.photos/400/300?random=3',
-      'funFact':
-      'Opera Nova, opened in 2006, is built partially over the Brda River and features a stunning modern design with glass facades.',
-      'question': 'When did Opera Nova open?',
-      'options': ['1995', '2000', '2006', '2012'],
-      'correctAnswer': 2,
-      'wikipediaUrl': 'https://en.wikipedia.org/wiki/Opera_Nova',
-    },
-  ];
-
   @override
   void initState() {
     super.initState();
-    _loadQuizState();
+    _loadStepData();
+  }
+
+  @override
+  void dispose() {
+    _apiClient.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadStepData() async {
+    try {
+      // Assuming scenario ID 1 and using locationIndex + 1 as stepId
+      final response = await _apiClient.api.getStep(1, widget.locationIndex + 1);
+      
+      if (response.body != null) {
+        setState(() {
+          _stepData = response.body;
+          _isLoading = false;
+        });
+        await _loadQuizState();
+      }
+    } catch (e) {
+      print('Error loading step data: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<int> _getGlobalScore() async {
@@ -135,15 +112,19 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
   }
 
   Future<void> _checkAnswer(int selectedIndex) async {
-    if (_isCompleted) return;
+    if (_isCompleted || _stepData == null) return;
 
     setState(() {
       _selectedAnswer = selectedIndex;
       _hasAnswered = true;
     });
 
-    final correctAnswer = _quizData[widget.locationIndex]['correctAnswer'];
-    if (selectedIndex == correctAnswer) {
+    int? correctAnswer;
+    if (_stepData is api.Question) {
+      correctAnswer = (_stepData as api.Question).validAnswerIndex;
+    }
+    
+    if (correctAnswer != null && selectedIndex == correctAnswer) {
       final currentScore = await _getGlobalScore();
       final newScore = currentScore + 1;
       await _setGlobalScore(newScore);
@@ -162,9 +143,6 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentQuiz = _quizData[widget.locationIndex];
-    final correctAnswerIndex = currentQuiz['correctAnswer'] as int;
-
     return Scaffold(
       backgroundColor: const Color(0xFFdbdad8),
       appBar: buildCustomAppBar(
@@ -173,56 +151,94 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
         showBackButton: true,
         showRefreshButton: false,
       ),
-      body:  Material( child:  SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Header(text: currentQuiz['name']),
-              const SizedBox(height: 16),
-              // TODO: insert photo
-
-              // Answer Options
-              ...List.generate(currentQuiz['options'].length, (index) {
-                final isSelected = _selectedAnswer == index;
-                final isCorrect = index == correctAnswerIndex;
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: AnswerOption(
-                    letter: String.fromCharCode(65 + index),
-                    text: currentQuiz['options'][index],
-                    isSelected: isSelected,
-                    isCorrect: isCorrect,
-                    hasAnswered: _hasAnswered,
-                    onTap: (_hasAnswered || _isCompleted)
-                        ? null
-                        : () => _checkAnswer(index),
-                  ),
-                );
-              }),
-
-              const SizedBox(height: 16),
-
-              FunFactCard(
-                funFact: currentQuiz['funFact'],
-                wikipediaUrl: currentQuiz['wikipediaUrl'],
-              ),
-
-              // if (_isCompleted)
-              //   Text(
-              //     'Global Owl Score: $_globalScore',
-              //     style: const TextStyle(
-              //       fontSize: 16,
-              //       fontWeight: FontWeight.bold,
-              //       color: Color(0xFF5C2E2E),
-              //       fontFamily: 'Serif',
-              //     ),
-              //   ),
-            ],
-          ),
-        ),
+      body: Material(
+        child: _isLoading
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text(
+                      'Loading quiz...',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              )
+            : _stepData == null
+                ? const Center(
+                    child: Text(
+                      'Unable to load quiz data',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  )
+                : _buildQuizContent(),
       ),
+    );
+  }
+
+  Widget _buildQuizContent() {
+    if (_stepData is! api.Question) {
+      return const Center(
+        child: Text(
+          'This step is not a quiz question',
+          style: TextStyle(fontSize: 16),
+        ),
+      );
+    }
+
+    final question = _stepData as api.Question;
+    final correctAnswerIndex = question.validAnswerIndex;
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Header(text: 'Quiz Step ${question.id}'),
+            const SizedBox(height: 16),
+            
+            Text(
+              question.question,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF6B1D27),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            
+            const SizedBox(height: 24),
+
+            // Answer Options
+            ...List.generate(question.answers.length, (index) {
+              final isSelected = _selectedAnswer == index;
+              final isCorrect = index == correctAnswerIndex;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: AnswerOption(
+                  letter: String.fromCharCode(65 + index),
+                  text: question.answers[index],
+                  isSelected: isSelected,
+                  isCorrect: isCorrect,
+                  hasAnswered: _hasAnswered,
+                  onTap: (_hasAnswered || _isCompleted)
+                      ? null
+                      : () => _checkAnswer(index),
+                ),
+              );
+            }),
+
+            const SizedBox(height: 16),
+
+            FunFactCard(
+              funFact: question.curiocity,
+              wikipediaUrl: 'https://en.wikipedia.org/wiki/Bydgoszcz', // Default fallback
+            ),
+          ],
+        ),
       ),
     );
   }
