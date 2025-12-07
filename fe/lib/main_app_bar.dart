@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/preferences/preferences.dart'; // Needed for PreferencesCubit/Status
 
 const _kCupidIconPath = 'assets/cupid-bow.svg';
-const _kRedCupidColor = Color(0xFF6a1f27);
+const _kRedCupidColor = Color(0xFF6B1D27);
 
 Widget _buildProfileCircle() {
   return Container(

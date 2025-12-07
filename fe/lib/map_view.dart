@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' show json;
 
 import 'package:zakochaj_sie_w_bydgoszczy_fe/quiz_view.dart';
+
+import 'main_app_bar.dart';
 // Import your quiz screen
 // import 'package:your_package_name/quiz_view_screen.dart';
 
@@ -122,9 +124,13 @@ class _MapScreenState extends State<MapScreen> {
         : _waypoints.map((wp) => wp['location'] as LatLng).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(''),
-        elevation: 2,
+      backgroundColor: const Color(0xFFdbdad8),
+      appBar: buildCustomAppBar(
+        context: context,
+        isInitialPage: false,
+        showBackButton: true, // Show the back button on the MapScreen
+        showRefreshButton: false,
+        // cubit is intentionally null/omitted here, so the back button uses Navigator.pop()
       ),
       body: GestureDetector(
         onScaleStart: (_) {},
@@ -197,7 +203,7 @@ class _MapScreenState extends State<MapScreen> {
                           child: Icon(
                             Icons.location_on,
                             size: 50,
-                            color: Color(0xFF8B2F3A),
+                            color: Color(0xFF6B1D27),
                             shadows: [
                               Shadow(
                                 color: Colors.black26,

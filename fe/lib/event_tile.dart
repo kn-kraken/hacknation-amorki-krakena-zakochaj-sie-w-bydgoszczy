@@ -32,7 +32,7 @@ class EventTile extends StatelessWidget {
               SvgPicture.asset(
                 svgAssetPath,
                 colorFilter: const ColorFilter.mode(
-                  Color(0xFF8B2F3A),
+                  Color(0xFF6B1D27),
                   BlendMode.srcIn,
                 ),
 
@@ -133,7 +133,7 @@ class EventTile extends StatelessWidget {
       child: const Icon(
         Icons.image,
         size: 40,
-        color: Color(0xFF8B2F3A),
+        color: Color(0xFF6B1D27),
       ),
     );
   }

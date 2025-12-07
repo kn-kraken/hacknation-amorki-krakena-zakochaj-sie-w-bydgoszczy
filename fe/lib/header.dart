@@ -25,7 +25,7 @@ class Header extends StatelessWidget {
             child: SvgPicture.asset(
               svgAssetPath,
               colorFilter: const ColorFilter.mode(
-                Color(0xFF8B2F3A), // White stamp border
+                Color(0xFF6B1D27), // White stamp border
                 BlendMode.srcIn,
               ),
             ),
