@@ -26,7 +26,7 @@ class MatchScreen extends StatelessWidget {
               
               // "IT'S A MATCH!" text
               const Text(
-                "Towarzyszka podróży znaleziona!",
+                "Odnajdźcie się w historii!",
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -42,7 +42,7 @@ class MatchScreen extends StatelessWidget {
               const Spacer(),
 
               StampedButton(
-                  text: 'Przejdź do mapy randki',
+                  text: 'Przejdź do mapy',
                   onPressed: () {
                     Navigator.push(
                       context,

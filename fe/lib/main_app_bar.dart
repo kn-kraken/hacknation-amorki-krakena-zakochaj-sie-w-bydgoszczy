@@ -25,6 +25,7 @@ AppBar buildCustomAppBar({
   bool isInitialPage = false,
   bool showBackButton = false,
   bool showRefreshButton = false,
+  String? title,
   // Pass the cubit directly if the back button logic is needed
   PreferencesCubit? cubit,
 }) {
@@ -83,7 +84,17 @@ AppBar buildCustomAppBar({
   }
 
   return AppBar(
-    title: const Text(''),
+    title: title != null
+        ? Text(
+      title,
+      style: const TextStyle(
+        color: _kRedCupidColor,
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+      ),
+    )
+        : const Text(''),
+    centerTitle: true,
     leading: leadingWidget,
     leadingWidth: isInitialPage ? 56 : 120,
     actions: actions,

@@ -39,8 +39,25 @@ class PreferencesScreen extends StatelessWidget {
       isInitialPage: isInitial,
       showBackButton: needsGoBack,
       showRefreshButton: isSwiping,
+      title: getTitle(status),
       cubit: cubit, // Pass the cubit for BLoC navigation
     );
+  }
+
+  String getTitle(PreferencesStatus status) {
+    switch(status) {
+      case PreferencesStatus.initial:
+        return '';
+      case PreferencesStatus.listDatesShouldSwipe:
+      case PreferencesStatus.listDatesNoSwipe:
+        return 'Wybierz swoją podróż przez dzieje!';
+      case PreferencesStatus.listProfiles:
+        return 'Wybierz towarzysza podróży!';
+      case PreferencesStatus.datePage:
+        return '';
+      case PreferencesStatus.matched:
+        return '';
+    }
   }
 
   Widget _buildBody(BuildContext context, PreferencesState state) {
@@ -63,6 +80,7 @@ class PreferencesScreen extends StatelessWidget {
 class InitialPage extends StatelessWidget {
   const InitialPage({super.key});
   static const String _kStampFramePath = 'assets/stamp.svg';
+  static const String _kDecorativePngPath = 'assets/your_image.png'; // Replace with your PNG path
   static const Color _kBackgroundColor = Color(0xFFdbdad8);
 
   @override
@@ -82,9 +100,11 @@ class InitialPage extends StatelessWidget {
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
                   children: [
                     const Text(
-                      "Tutaj historia łączy… a my podpowiadamy z kim.",
+                      "Tutaj historia łączy…\n a my podpowiadamy z kim",
+                      textAlign: TextAlign.center, // Center the text
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,

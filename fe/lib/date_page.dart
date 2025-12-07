@@ -14,7 +14,7 @@ class DatePage extends StatelessWidget {
         children: [
           const SizedBox(height: 16),
           StampedButton(
-            text: 'Przejdź do mapy randki',
+            text: 'Przejdź do mapy',
             onPressed: () {
               Navigator.push(
                 context,
