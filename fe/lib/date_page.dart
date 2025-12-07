@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zakochaj_sie_w_bydgoszczy_fe/buttons/stamped_button.dart';
 import 'map_view.dart';
 
 class DatePage extends StatelessWidget {
@@ -6,21 +7,14 @@ class DatePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
+    const svgAssetPath = 'assets/header_1.svg';
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.check_circle_outline, size: 80, color: Colors.blueGrey),
           const SizedBox(height: 16),
-          const Text(
-            'Thank you for selecting a date!',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.map_outlined),
-            label: const Text('Start Your Bydgoszcz Date Route!'),
+          StampedButton(
+            text: 'Przejdź do mapy randki',
             onPressed: () {
               Navigator.push(
                 context,
@@ -29,11 +23,8 @@ class DatePage extends StatelessWidget {
                 ),
               );
             },
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-              textStyle: const TextStyle(fontSize: 18),
-            ),
-          ),
+            svgAssetPath: svgAssetPath
+          )
         ],
       ),
     );
