@@ -15,14 +15,17 @@ class Scenario(TypedDict):
     id: int
     title: str
     description: str
-    steps: list[Question | Task]
+    steps: list[Step]
 
 
 StepType = Literal["question"] | Literal["task"]
 
 
 class Question(TypedDict):
+    id: int
     type: Literal["question"]
+    lat: float
+    long: float
     question: str
     answers: list[str]
     validAnswerIndex: int
@@ -30,9 +33,15 @@ class Question(TypedDict):
 
 
 class Task(TypedDict):
+    id: int
     type: Literal["task"]
+    lat: float
+    long: float
     task: str
     curiocity: str
+
+
+Step = Question | Task
 
 
 class ScenarioInfoRes(BaseModel):
@@ -49,6 +58,20 @@ class ScenarioInfoRes(BaseModel):
         )
 
 
+class StepInfoRes(BaseModel):
+    id: int
+    lat: float
+    long: float
+
+    @classmethod
+    def from_domain(cls, step: Step):
+        return cls(
+            id=step["id"],
+            lat=step["lat"],
+            long=step["long"],
+        )
+
+
 def get_scenarios_db(db: Annotated[Db, Depends(get_db)]) -> Collection[Scenario]:
     return db["scenarios"]
 
@@ -60,12 +83,29 @@ async def read_scenarios(
     return [ScenarioInfoRes.from_domain(scenario) for scenario in scenarios.find()]
 
 
-@router.get("/scenarios/{id}")
+@router.get("/scenarios/{id}/steps/")
 async def read_scenario(
     id: int,
     scenarios: Annotated[Collection[Scenario], Depends(get_scenarios_db)],
-) -> Scenario:
+) -> list[StepInfoRes]:
     scenario = scenarios.find_one({"id": id})
     if scenario is None:
         raise HTTPException(status_code=404, detail="Not found")
-    return scenario
+    return [StepInfoRes.from_domain(step) for step in scenario["steps"]]
+
+
+@router.get("/scenarios/{id}/steps/{step_id}")
+async def read_step(
+    id: int,
+    step_id: int,
+    scenarios: Annotated[Collection[Scenario], Depends(get_scenarios_db)],
+) -> Step:
+    scenario = scenarios.find_one({"id": id})
+    if scenario is None:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    match [step for step in scenario["steps"] if step["id"] == step_id]:
+        case [step]:
+            return step
+        case _:
+            raise HTTPException(status_code=404, detail="Not found")
