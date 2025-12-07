@@ -189,8 +189,22 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              Header(text: 'Przystanek ${question.id}'),
-              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+              child:Container(
+                width: double.infinity,
+                height: 200,
+                child: Image.network(
+                  question.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.broken_image, size: 50),
+                    );
+                  },
+                ),
+              ),),
 
               Text(
                 question.question,
@@ -242,6 +256,24 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+            child:Container(
+              width: double.infinity,
+              height: 200,
+              child: Image.network(
+                step.imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.broken_image, size: 50),
+                  );
+                },
+              ),
+            ),),
+
             Text(
               step.task ?? "No task available.",
               style: const TextStyle(

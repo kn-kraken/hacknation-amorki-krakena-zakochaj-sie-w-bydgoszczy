@@ -74,7 +74,7 @@ StepRes = QuestionRes | TaskRes
 
 def step_to_res(step: Step, base_url: URL) -> StepRes:
     return step | {
-        "image_url": f"{base_url}{step['image_hash']}"
+        "image_url": f"{base_url}blobs/{step['image_hash']}"
     }  # pyright: ignore[reportReturnType]
 
 

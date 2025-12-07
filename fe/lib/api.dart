@@ -1,4 +1,4 @@
- // ignore_for_file: type_literal_in_constant_pattern
+// ignore_for_file: type_literal_in_constant_pattern
 
 import 'dart:async';
 import 'dart:convert';
@@ -53,9 +53,14 @@ class ScenarioInfoRes {
   final String title;
   final String description;
 
-  ScenarioInfoRes({required this.id, required this.title, required this.description});
+  ScenarioInfoRes({
+    required this.id,
+    required this.title,
+    required this.description,
+  });
 
-  factory ScenarioInfoRes.fromJson(Map<String, dynamic> json) => _$ScenarioInfoResFromJson(json);
+  factory ScenarioInfoRes.fromJson(Map<String, dynamic> json) =>
+      _$ScenarioInfoResFromJson(json);
   Map<String, dynamic> toJson() => _$ScenarioInfoResToJson(this);
 }
 
@@ -67,7 +72,8 @@ class StepInfoRes {
 
   StepInfoRes({required this.id, required this.lat, required this.long});
 
-  factory StepInfoRes.fromJson(Map<String, dynamic> json) => _$StepInfoResFromJson(json);
+  factory StepInfoRes.fromJson(Map<String, dynamic> json) =>
+      _$StepInfoResFromJson(json);
   Map<String, dynamic> toJson() => _$StepInfoResToJson(this);
 }
 
@@ -77,7 +83,7 @@ sealed class Step {
   factory Step.fromJson(Map<String, dynamic> json) => switch (json["type"]) {
     "question" => Question.fromJson(json),
     "task" => Task.fromJson(json),
-     _ => throw Exception("Invalid step type ${json['type']}")
+    _ => throw Exception("Invalid step type ${json['type']}"),
   };
 }
 
@@ -87,6 +93,8 @@ class Question extends Step {
   final String type;
   final double lat;
   final double long;
+  @JsonKey(name: 'image_url')
+  final String imageUrl;
   final String question;
   final List<String> answers;
   final int validAnswerIndex;
@@ -97,13 +105,15 @@ class Question extends Step {
     required this.type,
     required this.lat,
     required this.long,
+    required this.imageUrl,
     required this.question,
     required this.answers,
     required this.validAnswerIndex,
     required this.curiocity,
   });
 
-  factory Question.fromJson(Map<String, dynamic> json) => _$QuestionFromJson(json);
+  factory Question.fromJson(Map<String, dynamic> json) =>
+      _$QuestionFromJson(json);
   Map<String, dynamic> toJson() => _$QuestionToJson(this);
 }
 
@@ -113,6 +123,8 @@ class Task extends Step {
   final String type;
   final double lat;
   final double long;
+  @JsonKey(name: 'image_url')
+  final String imageUrl;
   final String task;
   final String curiocity;
 
@@ -121,6 +133,7 @@ class Task extends Step {
     required this.type,
     required this.lat,
     required this.long,
+    required this.imageUrl,
     required this.task,
     required this.curiocity,
   });
@@ -182,10 +195,11 @@ class ApiConverter extends JsonConverter {
 
   @override
   FutureOr<Response<BodyType>> convertResponse<BodyType, SingleItemType>(
-      Response response) {
+    Response response,
+  ) {
     // Don't call super - handle the conversion ourselves
     final rawBody = response.body;
-    
+
     if (rawBody == null) {
       return Response(response.base, null, error: response.error);
     }
@@ -202,21 +216,35 @@ class ApiConverter extends JsonConverter {
       jsonBody = rawBody;
     }
 
-    final convertedBody = switch (BodyType) {
-      UserRes => UserRes.fromJson(jsonBody),
-      SwipeRes => SwipeRes.fromJson(jsonBody),
-      Item => Item.fromJson(jsonBody),
-      ScenarioInfoRes => ScenarioInfoRes.fromJson(jsonBody),
-      StepInfoRes => StepInfoRes.fromJson(jsonBody),
-      Question => Question.fromJson(jsonBody),
-      Task => Task.fromJson(jsonBody),
-      Step => Step.fromJson(jsonBody),
-      const (List<UserRes>) => (jsonBody as List).map((item) => UserRes.fromJson(item)).toList(),
-      const (List<ScenarioInfoRes>) => (jsonBody as List).map((item) => ScenarioInfoRes.fromJson(item)).toList(),
-      const (List<StepInfoRes>) => (jsonBody as List).map((item) => StepInfoRes.fromJson(item)).toList(),
-      const (Map<String, Item>) => (jsonBody as Map<String, dynamic>).map((key, value) => MapEntry(key, Item.fromJson(value))),
-      _ => super.convertResponse<BodyType, SingleItemType>(response),
-    } as BodyType;
+    final convertedBody =
+        switch (BodyType) {
+              UserRes => UserRes.fromJson(jsonBody),
+              SwipeRes => SwipeRes.fromJson(jsonBody),
+              Item => Item.fromJson(jsonBody),
+              ScenarioInfoRes => ScenarioInfoRes.fromJson(jsonBody),
+              StepInfoRes => StepInfoRes.fromJson(jsonBody),
+              Question => Question.fromJson(jsonBody),
+              Task => Task.fromJson(jsonBody),
+              Step => Step.fromJson(jsonBody),
+              const (List<UserRes>) =>
+                (jsonBody as List)
+                    .map((item) => UserRes.fromJson(item))
+                    .toList(),
+              const (List<ScenarioInfoRes>) =>
+                (jsonBody as List)
+                    .map((item) => ScenarioInfoRes.fromJson(item))
+                    .toList(),
+              const (List<StepInfoRes>) =>
+                (jsonBody as List)
+                    .map((item) => StepInfoRes.fromJson(item))
+                    .toList(),
+              const (Map<String, Item>) =>
+                (jsonBody as Map<String, dynamic>).map(
+                  (key, value) => MapEntry(key, Item.fromJson(value)),
+                ),
+              _ => super.convertResponse<BodyType, SingleItemType>(response),
+            }
+            as BodyType;
 
     return Response(response.base, convertedBody, error: response.error);
   }
