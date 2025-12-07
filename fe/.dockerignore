@@ -1,0 +1,38 @@
+# Build outputs
+build/
+.dart_tool/
+
+# Android
+android/
+!android/app/src/main/AndroidManifest.xml
+
+# iOS
+ios/
+
+# Desktop platforms
+linux/
+macos/
+windows/
+
+# Tests
+test/
+integration_test/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+doc/
