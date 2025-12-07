@@ -18,7 +18,7 @@ class PreferencesScreen extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           appBar: _buildAppBar(context, state.status),
-          body: _buildBody(context, state.status),
+          body: _buildBody(context, state!),
         );
       },
     );
@@ -41,8 +41,8 @@ class PreferencesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, PreferencesStatus status) {
-    switch (status) {
+  Widget _buildBody(BuildContext context, PreferencesState state) {
+    switch (state.status) {
       case PreferencesStatus.initial:
         return const InitialPage();
       case PreferencesStatus.listDatesShouldSwipe:
@@ -53,7 +53,7 @@ class PreferencesScreen extends StatelessWidget {
       case PreferencesStatus.datePage:
         return const DatePage();
       case PreferencesStatus.matched:
-        return const MatchScreen();
+        return MatchScreen(matchedCard: state.matchedCard!);
     }
   }
 }

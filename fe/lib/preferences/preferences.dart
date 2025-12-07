@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../swapper.dart';
+
 // --- States ---
 enum PreferencesStatus {
   initial,
@@ -12,11 +14,13 @@ enum PreferencesStatus {
 
 class PreferencesState {
   final PreferencesStatus status;
+  final CardItem? matchedCard;
   final String? selectedDateId;
   final bool shouldSwipe;
 
   const PreferencesState({
     required this.status,
+    this.matchedCard,
     this.selectedDateId,
     this.shouldSwipe = false,
   });
@@ -27,11 +31,13 @@ class PreferencesState {
 
   PreferencesState copyWith({
     PreferencesStatus? status,
+    CardItem? matchedCard,
     String? selectedDateId,
     bool? shouldSwipe,
   }) {
     return PreferencesState(
       status: status ?? this.status,
+      matchedCard: matchedCard,
       selectedDateId: selectedDateId ?? this.selectedDateId,
       shouldSwipe: shouldSwipe ?? this.shouldSwipe,
     );

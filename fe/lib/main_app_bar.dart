@@ -31,15 +31,6 @@ AppBar buildCustomAppBar({
   List<Widget> actions = [];
   Widget? leadingWidget;
 
-  if (showRefreshButton) {
-    // Assuming SwipeBloc is accessible via context.read
-    actions.add(
-      IconButton(
-        icon: const Icon(Icons.refresh),
-        onPressed: () { /* Handle refresh logic here or pass a callback */ },
-      ),
-    );
-  }
   actions.add(_buildProfileCircle()); // Always show profile circle
 
   if (isInitialPage) {

@@ -110,6 +110,7 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
       if (matched) {
         final newState = preferences.state.copyWith(
           status: PreferencesStatus.matched,
+          matchedCard: event.card,
         );
         preferences.emit(newState);
       }
@@ -157,7 +158,7 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
     });
 
     // Initialize with loading first user
-    add(LoadNextUser());
+    // add(LoadNextUser());
   }
 }
 
@@ -169,18 +170,7 @@ class SwipeCardsScreenContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFdbdad8),
-      appBar: AppBar(
-        title: const Text('Swipe Cards'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => context.read<SwipeBloc>().add(ResetCards()),
-          ),
-        ],
-      ),
-      body: Column(
+    return Column(
         children: [
           Expanded(
             child: BlocBuilder<SwipeBloc, SwipeState>(
@@ -229,8 +219,7 @@ class SwipeCardsScreenContent extends StatelessWidget {
           ),
           _buildActionButtons(context),
         ],
-      ),
-    );
+      );
   }
 
   Widget _buildCard(
