@@ -101,6 +101,7 @@ steps = [
     type: "question",
     lat: 53.123208,
     long: 18.001261,
+    image_hash: blobs[30].hash,
     question:
       "Zaobserwuj rzeźbę przy moście. Zgadnij nazwę rzeźby, którą widzisz:",
     answers: ["Akrobata", "Przechodzący przez rzekę", "Dzień w chmurach"],
@@ -113,6 +114,7 @@ steps = [
     type: "question",
     lat: 53.122973,
     long: 17.999429,
+    image_hash: blobs[31].hash,
     question: "Katedra Bydgoska. Zgadnij rok budowy:",
     answers: ["1466", "1604", "1308"],
     validAnswerIndex: 0,
@@ -124,6 +126,7 @@ steps = [
     type: "question",
     lat: 53.119686,
     long: 17.990881,
+    image_hash: blobs[32].hash,
     question: "Wieża ciśnień. Zgadnij wysokość zabytku:",
     answers: ["21 m", "45 m", "32 m"],
     validAnswerIndex: 1,
@@ -135,6 +138,7 @@ steps = [
     type: "question",
     lat: 53.122926,
     long: 17.994599,
+    image_hash: blobs[33].hash,
     question:
       "Wyspa Młyńska. Znajdź dom Dom Leona Wyczółkowskiego. W jakim stylu powstał ten dom?",
     answers: ["Gotyckim", "Neoromantycznym", "Romańskim"],
@@ -147,6 +151,7 @@ steps = [
     type: "task",
     lat: 53.123736,
     long: 17.998304,
+    image_hash: blobs[35].hash,
     task: "Most Miłości Jana Kiepury. Zrób sobie wspólne zdjęcie.",
     curiocity:
       "Do wieszania swoich kłódek mieszkańcy upatrzyli sobie Most Kiepury prowadzący na Wyspę Młyńską, jednak z przyczyn technicznych kłódki te musiały zostać zdjęte. Powstała za to specjalnie na tę okazję przygotowana metalowa instalacja przy bulwarach.",
@@ -156,6 +161,7 @@ steps = [
     type: "task",
     lat: 53.126262,
     long: 18.004072,
+    image_hash: blobs[37].hash,
     task: "Zapraszamy was na kawę. Polecana kawiarnia w okolicy to: Bromberg Kaffee – bydgoska palarnia kawy.",
     curiocity:
       "Nasze ziarna są wypalane metodą rzemieślniczą, w małych partiach. To pozwala nam kontrolować każdy etap i wydobyć pełnię smaku – głęboki, czysty profil, bez goryczy i przesadnej kwasowości.",
