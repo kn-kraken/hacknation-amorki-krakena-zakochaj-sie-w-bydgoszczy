@@ -1,6 +1,9 @@
+// quiz_view_screen.dart
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:zakochaj_sie_w_bydgoszczy_fe/quiz/fun_fact.dart';
+import 'header.dart';
+import 'main_app_bar.dart';
 
 class QuizViewScreen extends StatefulWidget {
   final int locationIndex;
@@ -17,7 +20,6 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
   int _globalScore = 0;
   bool _isCompleted = false;
 
-  // Global owl score storage key
   static const String _scoreKey = 'global_owl_score';
   static const String _completedQuizzesKey = 'completed_quizzes';
 
@@ -26,7 +28,7 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
       'name': 'Old Market Square',
       'imageUrl': 'https://picsum.photos/400/300?random=1',
       'funFact':
-          'The Old Market Square in Bydgoszcz was established in the 14th century and served as the heart of medieval trade routes.',
+      'The Old Market Square in Bydgoszcz was established in the 14th century and served as the heart of medieval trade routes.',
       'question': 'When was the Old Market Square in Bydgoszcz established?',
       'options': [
         '12th century',
@@ -41,7 +43,7 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
       'name': 'Cathedral Basilica',
       'imageUrl': 'https://picsum.photos/400/300?random=4',
       'funFact':
-          'The Bydgoszcz Cathedral was originally built as a parish church in the 15th century and became a cathedral in 2004.',
+      'The Bydgoszcz Cathedral was originally built as a parish church in the 15th century and became a cathedral in 2004.',
       'question': 'In what year did the church become a cathedral?',
       'options': ['1945', '1989', '2004', '2010'],
       'correctAnswer': 2,
@@ -51,7 +53,7 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
       'name': 'Mill Island',
       'imageUrl': 'https://picsum.photos/400/300?random=2',
       'funFact':
-          'Mill Island has been home to grain mills since medieval times, utilizing the Brda River\'s water power for centuries.',
+      'Mill Island has been home to grain mills since medieval times, utilizing the Brda River\'s water power for centuries.',
       'question': 'What was Mill Island historically used for?',
       'options': [
         'Fishing harbor',
@@ -66,7 +68,7 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
       'name': 'Opera Nova',
       'imageUrl': 'https://picsum.photos/400/300?random=3',
       'funFact':
-          'Opera Nova, opened in 2006, is built partially over the Brda River and features a stunning modern design with glass facades.',
+      'Opera Nova, opened in 2006, is built partially over the Brda River and features a stunning modern design with glass facades.',
       'question': 'When did Opera Nova open?',
       'options': ['1995', '2000', '2006', '2012'],
       'correctAnswer': 2,
@@ -109,15 +111,13 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
   Future<void> _loadQuizState() async {
     final isCompleted = await _isQuizCompleted();
     final globalScore = await _getGlobalScore();
-    
+
     if (isCompleted) {
       final prefs = await SharedPreferences.getInstance();
       final savedAnswer = prefs.getString('quiz_${widget.locationIndex}_answer');
       setState(() {
         _hasAnswered = true;
-        _selectedAnswer = savedAnswer != null
-            ? int.tryParse(savedAnswer)
-            : null;
+        _selectedAnswer = savedAnswer != null ? int.tryParse(savedAnswer) : null;
         _isCompleted = isCompleted;
         _globalScore = globalScore;
       });
@@ -135,7 +135,7 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
   }
 
   Future<void> _checkAnswer(int selectedIndex) async {
-    if (_isCompleted) return; // Prevent re-answering
+    if (_isCompleted) return;
 
     setState(() {
       _selectedAnswer = selectedIndex;
@@ -144,7 +144,6 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
 
     final correctAnswer = _quizData[widget.locationIndex]['correctAnswer'];
     if (selectedIndex == correctAnswer) {
-      // Add 1 to global score
       final currentScore = await _getGlobalScore();
       final newScore = currentScore + 1;
       await _setGlobalScore(newScore);
@@ -153,52 +152,12 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
       });
     }
 
-    // Save this quiz as completed
     await _markQuizCompleted();
     await _saveQuizAnswer(selectedIndex);
-    
+
     setState(() {
       _isCompleted = true;
     });
-  }
-
-  Future<void> _showCompletionMessage() async {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Text('🦉', style: TextStyle(fontSize: 24)),
-              const SizedBox(width: 12),
-              Text(
-                'Global Owl Score: $_globalScore',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
-  }
-
-  Future<void> _launchWikipedia() async {
-    final url = _quizData[widget.locationIndex]['wikipediaUrl'];
-    final uri = Uri.parse(url);
-    
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not open Wikipedia link'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 
   @override
@@ -207,269 +166,151 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
     final correctAnswerIndex = currentQuiz['correctAnswer'] as int;
 
     return Scaffold(
-      appBar: AppBar(title: Text(currentQuiz['name']), elevation: 2),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Place Image
-            Container(
-              width: double.infinity,
-              height: 250,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(currentQuiz['imageUrl']),
-                  fit: BoxFit.cover,
-                ),
+      backgroundColor: const Color(0xFFdbdad8),
+      appBar: buildCustomAppBar(
+        context: context,
+        isInitialPage: false,
+        showBackButton: true,
+        showRefreshButton: false,
+      ),
+      body:  Material( child:  SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Header(text: currentQuiz['name']),
+              const SizedBox(height: 16),
+              // TODO: insert photo
+
+              // Answer Options
+              ...List.generate(currentQuiz['options'].length, (index) {
+                final isSelected = _selectedAnswer == index;
+                final isCorrect = index == correctAnswerIndex;
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: AnswerOption(
+                    letter: String.fromCharCode(65 + index),
+                    text: currentQuiz['options'][index],
+                    isSelected: isSelected,
+                    isCorrect: isCorrect,
+                    hasAnswered: _hasAnswered,
+                    onTap: (_hasAnswered || _isCompleted)
+                        ? null
+                        : () => _checkAnswer(index),
+                  ),
+                );
+              }),
+
+              const SizedBox(height: 16),
+
+              FunFactCard(
+                funFact: currentQuiz['funFact'],
+                wikipediaUrl: currentQuiz['wikipediaUrl'],
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
-                  ),
-                ),
-                alignment: Alignment.bottomLeft,
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  currentQuiz['name'],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+
+              // if (_isCompleted)
+              //   Text(
+              //     'Global Owl Score: $_globalScore',
+              //     style: const TextStyle(
+              //       fontSize: 16,
+              //       fontWeight: FontWeight.bold,
+              //       color: Color(0xFF5C2E2E),
+              //       fontFamily: 'Serif',
+              //     ),
+              //   ),
+            ],
+          ),
+        ),
+      ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// widgets/answer_option.dart
+// ============================================
+
+class AnswerOption extends StatelessWidget {
+  final String letter;
+  final String text;
+  final bool isSelected;
+  final bool isCorrect;
+  final bool hasAnswered;
+  final VoidCallback? onTap;
+
+  const AnswerOption({
+    super.key,
+    required this.letter,
+    required this.text,
+    required this.isSelected,
+    required this.isCorrect,
+    required this.hasAnswered,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Widget? leadingIcon;
+
+    if (hasAnswered) {
+      if (isCorrect) {
+        leadingIcon = const Icon(
+          Icons.check_circle,
+          color: Color(0xFF2E5C2E),
+          size: 20,
+        );
+      } else if (isSelected && !isCorrect) {
+        leadingIcon = const Icon(
+          Icons.cancel,
+          color: Color(0xFF8B0000),
+          size: 20,
+        );
+      }
+    }
+
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 18,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFFdbdad8),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: const Color(0xFF6B1D27),
+            width: 2,
+          ),
+        ),
+        child: Row(
+          children: [
+            Text(
+              '$letter.',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF6B1D27),
+                fontFamily: 'Serif',
               ),
             ),
+            const SizedBox(width: 12),
+            if (leadingIcon != null) ...[
+              leadingIcon,
+              const SizedBox(width: 8),
+            ],
+            Expanded(
+              child: Text(
+                text,
+                style: const TextStyle(
+                  fontSize: 16,
 
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Owl Score
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _isCompleted
-                          ? Colors.green.withValues(alpha: 0.2)
-                          : Colors.amber.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: _isCompleted ? Colors.green : Colors.amber,
-                        width: 2,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('🦉', style: TextStyle(fontSize: 24)),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Global Owl Score: $_globalScore',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        if (_isCompleted) ...[
-                          const SizedBox(width: 8),
-                          const Icon(
-                            Icons.check_circle,
-                            color: Colors.green,
-                            size: 24,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
+                  color: Color(0xFF6B1D27),
+                  fontFamily: 'Serif',
 
-                  const SizedBox(height: 24),
-
-                  // Fun Fact
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.blue.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.lightbulb, color: Colors.blue),
-                            SizedBox(width: 8),
-                            Text(
-                              'Historic Fun Fact',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          currentQuiz['funFact'],
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[800],
-                            height: 1.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Question
-                  Text(
-                    currentQuiz['question'],
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Answer Options
-                  ...List.generate(currentQuiz['options'].length, (index) {
-                    final isSelected = _selectedAnswer == index;
-                    final isCorrect = index == correctAnswerIndex;
-
-                    Color? backgroundColor;
-                    Color? borderColor;
-
-                    if (_hasAnswered) {
-                      if (isCorrect) {
-                        backgroundColor = Colors.green.withValues(alpha: 0.2);
-                        borderColor = Colors.green;
-                      } else if (isSelected && !isCorrect) {
-                        backgroundColor = Colors.red.withValues(alpha: 0.2);
-                        borderColor = Colors.red;
-                      }
-                    }
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: InkWell(
-                        onTap: (_hasAnswered || _isCompleted)
-                            ? null
-                            : () async {
-                                await _checkAnswer(index);
-                                await _showCompletionMessage();
-                              },
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: backgroundColor ?? Colors.grey[100],
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: borderColor ?? Colors.grey[300]!,
-                              width: 2,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: borderColor ?? Colors.grey[400],
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    String.fromCharCode(65 + index),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  currentQuiz['options'][index],
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                              ),
-                              if (_hasAnswered && isCorrect)
-                                const Icon(
-                                  Icons.check_circle,
-                                  color: Colors.green,
-                                ),
-                              if (_hasAnswered && isSelected && !isCorrect)
-                                const Icon(Icons.cancel, color: Colors.red),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-
-                  const SizedBox(height: 24),
-
-                  // Completion message
-                  if (_isCompleted)
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.green, width: 2),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(
-                            Icons.check_circle,
-                            color: Colors.green,
-                            size: 24,
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Quiz completed! Visit other locations to earn more owls.',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                  if (_isCompleted) const SizedBox(height: 24),
-
-                  // Wikipedia Link Button
-                  OutlinedButton.icon(
-                    onPressed: _launchWikipedia,
-                    icon: const Icon(Icons.public),
-                    label: const Text('Read More on Wikipedia'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ],
@@ -477,4 +318,16 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
       ),
     );
   }
+}
+
+// ============================================
+// Optional: utils/vintage_colors.dart
+// ============================================
+
+class VintageColors {
+  static const Color background = Color(0xFFD4CECA);
+  static const Color primary = Color(0xFF5C2E2E);
+  static const Color textDark = Color(0xFF3E1F1F);
+  static const Color success = Color(0xFF2E5C2E);
+  static const Color error = Color(0xFF8B0000);
 }
