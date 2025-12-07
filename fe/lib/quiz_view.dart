@@ -42,8 +42,11 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
   Future<void> _loadStepData() async {
     try {
       // Assuming scenario ID 1 and using locationIndex + 1 as stepId
-      final response = await _apiClient.api.getStep(1, widget.locationIndex + 1);
-      
+      final response = await _apiClient.api.getStep(
+        1,
+        widget.locationIndex + 1,
+      );
+
       if (response.body != null) {
         setState(() {
           _stepData = response.body;
@@ -91,10 +94,14 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
 
     if (isCompleted) {
       final prefs = await SharedPreferences.getInstance();
-      final savedAnswer = prefs.getString('quiz_${widget.locationIndex}_answer');
+      final savedAnswer = prefs.getString(
+        'quiz_${widget.locationIndex}_answer',
+      );
       setState(() {
         _hasAnswered = true;
-        _selectedAnswer = savedAnswer != null ? int.tryParse(savedAnswer) : null;
+        _selectedAnswer = savedAnswer != null
+            ? int.tryParse(savedAnswer)
+            : null;
         _isCompleted = isCompleted;
         _globalScore = globalScore;
       });
@@ -108,7 +115,10 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
 
   Future<void> _saveQuizAnswer(int answer) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('quiz_${widget.locationIndex}_answer', answer.toString());
+    await prefs.setString(
+      'quiz_${widget.locationIndex}_answer',
+      answer.toString(),
+    );
   }
 
   Future<void> _checkAnswer(int selectedIndex) async {
@@ -123,7 +133,7 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
     if (_stepData is api.Question) {
       correctAnswer = (_stepData as api.Question).validAnswerIndex;
     }
-    
+
     if (correctAnswer != null && selectedIndex == correctAnswer) {
       final currentScore = await _getGlobalScore();
       final newScore = currentScore + 1;
@@ -159,21 +169,18 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
                   children: [
                     CircularProgressIndicator(),
                     SizedBox(height: 16),
-                    Text(
-                      'Loading quiz...',
-                      style: TextStyle(fontSize: 16),
-                    ),
+                    Text('Loading quiz...', style: TextStyle(fontSize: 16)),
                   ],
                 ),
               )
             : _stepData == null
-                ? const Center(
-                    child: Text(
-                      'Unable to load quiz data',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  )
-                : _buildQuizContent(),
+            ? const Center(
+                child: Text(
+                  'Unable to load quiz data',
+                  style: TextStyle(fontSize: 16),
+                ),
+              )
+            : _buildQuizContent(),
       ),
     );
   }
@@ -185,85 +192,13 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
       final correctAnswerIndex = question.validAnswerIndex;
 
       return SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-              child:Container(
-                width: double.infinity,
-                height: 200,
-                child: Image.network(
-                  question.imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.broken_image, size: 50),
-                    );
-                  },
-                ),
-              ),),
-
-              Text(
-                question.question,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF6B1D27),
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 24),
-
-              ...List.generate(question.answers.length, (index) {
-                final isSelected = _selectedAnswer == index;
-                final isCorrect = index == correctAnswerIndex;
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: AnswerOption(
-                    letter: String.fromCharCode(65 + index),
-                    text: question.answers[index],
-                    isSelected: isSelected,
-                    isCorrect: isCorrect,
-                    hasAnswered: _hasAnswered,
-                    onTap: (_hasAnswered || _isCompleted)
-                        ? null
-                        : () => _checkAnswer(index),
-                  ),
-                );
-              }),
-
-              const SizedBox(height: 16),
-
-              FunFactCard(
-                funFact: question.curiocity,
-                wikipediaUrl: 'https://visitbydgoszcz.pl/pl/',
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // If the step is NOT a quiz → Display task-style screen
-    final step = _stepData as api.Task; // Guaranteed not null here
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-            child:Container(
+            SizedBox(
               width: double.infinity,
               height: 200,
               child: Image.network(
-                step.imageUrl,
+                question.imageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
@@ -272,26 +207,99 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
                   );
                 },
               ),
-            ),),
-
-            Text(
-              step.task ?? "No task available.",
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF6B1D27),
-              ),
-              textAlign: TextAlign.center,
             ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Text(
+                    question.question,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF6B1D27),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
 
-            const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-            FunFactCard(
-              funFact: step.curiocity ?? "Interesting place fact!",
-              wikipediaUrl: 'https://visitbydgoszcz.pl/pl/',
+                  ...List.generate(question.answers.length, (index) {
+                    final isSelected = _selectedAnswer == index;
+                    final isCorrect = index == correctAnswerIndex;
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: AnswerOption(
+                        letter: String.fromCharCode(65 + index),
+                        text: question.answers[index],
+                        isSelected: isSelected,
+                        isCorrect: isCorrect,
+                        hasAnswered: _hasAnswered,
+                        onTap: (_hasAnswered || _isCompleted)
+                            ? null
+                            : () => _checkAnswer(index),
+                      ),
+                    );
+                  }),
+
+                  const SizedBox(height: 16),
+
+                  FunFactCard(
+                    funFact: question.curiocity,
+                    wikipediaUrl: 'https://visitbydgoszcz.pl/pl/',
+                  ),
+                ],
+              ),
             ),
           ],
         ),
+      );
+    }
+
+    // If the step is NOT a quiz → Display task-style screen
+    final step = _stepData as api.Task; // Guaranteed not null here
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            height: 200,
+            child: Image.network(
+              step.imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.broken_image, size: 50),
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Text(
+                  step.task,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF6B1D27),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 24),
+
+                FunFactCard(
+                  funFact: step.curiocity ?? "Interesting place fact!",
+                  wikipediaUrl: 'https://visitbydgoszcz.pl/pl/',
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -342,17 +350,11 @@ class AnswerOption extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 12,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
           color: const Color(0xFFdbdad8),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: const Color(0xFF6B1D27),
-            width: 2,
-          ),
+          border: Border.all(color: const Color(0xFF6B1D27), width: 2),
         ),
         child: Row(
           children: [
@@ -366,10 +368,7 @@ class AnswerOption extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            if (leadingIcon != null) ...[
-              leadingIcon,
-              const SizedBox(width: 8),
-            ],
+            if (leadingIcon != null) ...[leadingIcon, const SizedBox(width: 8)],
             Expanded(
               child: Text(
                 text,
@@ -378,7 +377,6 @@ class AnswerOption extends StatelessWidget {
 
                   color: Color(0xFF6B1D27),
                   fontFamily: 'Serif',
-
                 ),
               ),
             ),

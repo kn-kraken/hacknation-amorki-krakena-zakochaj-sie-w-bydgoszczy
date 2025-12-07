@@ -23,7 +23,7 @@ class _MapScreenState extends State<MapScreen> {
   final ApiClient _apiClient = ApiClient();
 
   // Center of Bydgoszcz
-  final LatLng _center = LatLng(53.1235, 18.0084);
+  final LatLng _center = LatLng(53.1235, 18.0000);
 
   // Store route points
   List<LatLng> _routePoints = [];
@@ -172,7 +172,7 @@ class _MapScreenState extends State<MapScreen> {
         mapController: _mapController,
         options: MapOptions(
           initialCenter: _center,
-          initialZoom: 14.0,
+          initialZoom: 16.0,
           minZoom: 10.0,
           maxZoom: 18.0,
           interactionOptions: const InteractionOptions(
