@@ -17,8 +17,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Swipe Cards',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      title: 'Zakochaj się w Bydgoszczy',
+      theme: ThemeData(scaffoldBackgroundColor: Color(0xFFdbdad8)),
       home: Provider(
         create: (context) => ApiClient(),
         child: MultiBlocProvider(

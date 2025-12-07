@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zakochaj_sie_w_bydgoszczy_fe/header.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/swapper.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/date_page.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/preferences/preferences.dart';
+import '../buttons/stamped_button.dart';
+import '../event_tile.dart';
+import '../main_app_bar.dart';
 
 class PreferencesScreen extends StatelessWidget {
   const PreferencesScreen({super.key});
@@ -20,39 +25,22 @@ class PreferencesScreen extends StatelessWidget {
   }
 
   AppBar _buildAppBar(BuildContext context, PreferencesStatus status) {
-    String title = '';
-    List<Widget> actions = [];
     final cubit = context.read<PreferencesCubit>();
+    final isInitial = status == PreferencesStatus.initial;
+    final isSwiping = status == PreferencesStatus.listProfiles;
 
-    if (status == PreferencesStatus.initial) {
-      title = 'Start Dating';
-    } else if (status == PreferencesStatus.listDatesShouldSwipe) {
-      title = 'LIST OF DATES';
-    } else if (status == PreferencesStatus.listProfiles) {
-      title = 'MATCHING PROFILES';
-      actions = [
-        IconButton(
-          icon: const Icon(Icons.refresh),
-          onPressed: () => context.read<SwipeBloc>().add(ResetCards()),
-        ),
-      ];
-    }
+    // Check if the current status is one that uses BLoC navigation (i.e., not the MapScreen)
+    final needsGoBack = status != PreferencesStatus.initial;
 
-    return AppBar(
-      title: Text(title),
-      leading: status != PreferencesStatus.initial
-          ? IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          cubit.goBack();
-        },
-      )
-          : null,
-      actions: actions,
+    return buildCustomAppBar(
+      context: context,
+      isInitialPage: isInitial,
+      showBackButton: needsGoBack,
+      showRefreshButton: isSwiping,
+      cubit: cubit, // Pass the cubit for BLoC navigation
     );
   }
 
-  // Helper to swap the body content
   Widget _buildBody(BuildContext context, PreferencesStatus status) {
     switch (status) {
       case PreferencesStatus.initial:
@@ -70,22 +58,41 @@ class PreferencesScreen extends StatelessWidget {
 
 class InitialPage extends StatelessWidget {
   const InitialPage({super.key});
+  static const String _kStampFramePath = 'assets/stamp.svg';
+  static const Color _kBackgroundColor = Color(0xFFdbdad8);
+
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<PreferencesCubit>();
-    return Center(
+
+    return Container(
+      color: _kBackgroundColor,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Text('Looking for love?', style: TextStyle(fontSize: 24)),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () => cubit.startPreferencesFlow(),
-            child: const Text('YES'),
-          ),
-          ElevatedButton(
-            onPressed: () => cubit.startPreferencesNoSwipe(),
-            child: const Text('NO'),
+
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Header(text: 'CZEGO DZIŚ SZUKASZ'),
+                    StampedButton(
+                      text: 'SZUKAM PARY',
+                      onPressed: () => cubit.startPreferencesFlow(),
+                      svgAssetPath: _kStampFramePath,
+                    ),
+                    const SizedBox(height: 30),
+                    StampedButton(
+                      text: 'MAM PARTNERA/\nPARTNERKĘ',
+                      onPressed: () => cubit.startPreferencesNoSwipe(),
+                      svgAssetPath: _kStampFramePath,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -93,11 +100,23 @@ class InitialPage extends StatelessWidget {
   }
 }
 
+// Updated ListDatesPage with DateStampTile
 class ListDatesPage extends StatelessWidget {
   const ListDatesPage({super.key});
+
   final List<Map<String, String>> dates = const [
-    {'id': '1', 'title': 'Coffee Date', 'desc': 'Quick and casual'},
-    {'id': '2', 'title': 'Dinner & a Movie', 'desc': 'A classic choice'},
+    {
+      'id': '1',
+      'title': 'Coffee Date',
+      'desc': 'Quick and casualQuick and casualQuick and casualQuick and casualQuick and casual',
+      // 'image': 'assets/images/coffee.jpg', // Add your image path
+    },
+    {
+      'id': '2',
+      'title': 'Dinner & a Movie',
+      'desc': 'A classic choice',
+      // 'image': 'assets/images/dinner.jpg',
+    },
   ];
 
   @override
@@ -105,12 +124,13 @@ class ListDatesPage extends StatelessWidget {
     final cubit = context.read<PreferencesCubit>();
     return ListView.builder(
       itemCount: dates.length,
+      padding: const EdgeInsets.only(top: 10, bottom: 20),
       itemBuilder: (context, index) {
         final date = dates[index];
-        return ListTile(
-          leading: const Icon(Icons.favorite),
-          title: Text(date['title']!),
-          subtitle: Text(date['desc']!),
+        return EventTile(
+          title: date['title']!,
+          description: date['desc']!,
+          imageUrl: date['image'],
           onTap: () => cubit.selectDate(date['id']!),
         );
       },
