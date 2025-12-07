@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math';
-
-const login = "gilewski";
+import 'api.dart';
 
 // Models
 class CardItem {
-  final String id;
-  final String title;
+  final String login;
+  final String name;
   final String imageUrl;
 
-  CardItem({required this.id, required this.title, required this.imageUrl});
+  CardItem({required this.login, required this.name, required this.imageUrl});
+
+  factory CardItem.fromUserRes(UserRes user) {
+    return CardItem(
+      login: user.login,
+      name: user.name,
+      imageUrl: user.imageUrl,
+    );
+  }
 }
 
 // Events
@@ -28,18 +35,22 @@ class SwipeLeft extends SwipeEvent {
 
 class ResetCards extends SwipeEvent {}
 
+class LoadNextUser extends SwipeEvent {}
+
 // State
 class SwipeState {
   final List<CardItem> cards;
   final List<CardItem> likedCards;
   final List<CardItem> dislikedCards;
   final int currentIndex;
+  final bool isLoading;
 
   SwipeState({
     required this.cards,
     required this.likedCards,
     required this.dislikedCards,
     required this.currentIndex,
+    this.isLoading = false,
   });
 
   SwipeState copyWith({
@@ -47,12 +58,14 @@ class SwipeState {
     List<CardItem>? likedCards,
     List<CardItem>? dislikedCards,
     int? currentIndex,
+    bool? isLoading,
   }) {
     return SwipeState(
       cards: cards ?? this.cards,
       likedCards: likedCards ?? this.likedCards,
       dislikedCards: dislikedCards ?? this.dislikedCards,
       currentIndex: currentIndex ?? this.currentIndex,
+      isLoading: isLoading ?? this.isLoading,
     );
   }
 
@@ -62,15 +75,50 @@ class SwipeState {
 
 // BLoC
 class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
-  SwipeBloc()
+  final ApiService apiService;
+
+  SwipeBloc({required this.apiService})
     : super(
         SwipeState(
-          cards: _generateSampleCards(),
+          cards: [],
           likedCards: [],
           dislikedCards: [],
           currentIndex: 0,
+          isLoading: true,
         ),
       ) {
+    on<LoadNextUser>((event, emit) async {
+      try {
+        emit(state.copyWith(isLoading: true));
+        debugPrint("a - Starting API call");
+        final response = await apiService.getNextUser();
+        debugPrint("b - response: $response");
+        debugPrint("b2 - response statusCode: ${response.statusCode}");
+        debugPrint("b3 - response body: ${response.body}");
+        debugPrint("b4 - response isSuccessful: ${response.isSuccessful}");
+        
+        if (!response.isSuccessful) {
+          debugPrint("d - unsuccessful response");
+          emit(state.copyWith(isLoading: false));
+          return;
+        }
+
+        if (response.body == null) {
+          debugPrint("e - response body is null");
+          emit(state.copyWith(isLoading: false));
+          return;
+        }
+
+        debugPrint("c - successful response with body");
+        final newCard = CardItem.fromUserRes(response.body!);
+        emit(state.copyWith(cards: [...state.cards, newCard], isLoading: false));
+      } catch (e, stackTrace) {
+        debugPrint("f - exception: $e");
+        debugPrint("f2 - stackTrace: $stackTrace");
+        emit(state.copyWith(isLoading: false));
+      }
+    });
+
     on<SwipeRight>((event, emit) {
       emit(
         state.copyWith(
@@ -78,6 +126,11 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
           currentIndex: state.currentIndex + 1,
         ),
       );
+
+      // Load more cards when getting close to the end
+      if (state.currentIndex + 2 >= state.cards.length) {
+        add(LoadNextUser());
+      }
     });
 
     on<SwipeLeft>((event, emit) {
@@ -87,29 +140,28 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
           currentIndex: state.currentIndex + 1,
         ),
       );
+
+      // Load more cards when getting close to the end
+      if (state.currentIndex + 2 >= state.cards.length) {
+        add(LoadNextUser());
+      }
     });
 
     on<ResetCards>((event, emit) {
       emit(
         SwipeState(
-          cards: _generateSampleCards(),
+          cards: [],
           likedCards: [],
           dislikedCards: [],
           currentIndex: 0,
+          isLoading: true,
         ),
       );
+      add(LoadNextUser());
     });
-  }
 
-  static List<CardItem> _generateSampleCards() {
-    return List.generate(
-      10,
-      (i) => CardItem(
-        id: 'card_$i',
-        title: 'Item ${i + 1}',
-        imageUrl: 'https://picsum.photos/400/500?random=$i',
-      ),
-    );
+    // Initialize with loading first user
+    add(LoadNextUser());
   }
 }
 
@@ -171,7 +223,7 @@ class SwipeCardsScreenContent extends StatelessWidget {
                       context,
                       state.currentCard!,
                       true,
-                      key: ValueKey(state.currentCard!.id),
+                      key: ValueKey(state.currentCard!.login),
                     ),
                   ],
                 );
@@ -221,7 +273,7 @@ class SwipeCardsScreenContent extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    card.title,
+                    card.name,
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -360,7 +412,7 @@ class _DraggableCardState extends State<DraggableCard> {
                         Padding(
                           padding: const EdgeInsets.all(16),
                           child: Text(
-                            widget.card.title,
+                            widget.card.name,
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,

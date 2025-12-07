@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:chopper/chopper.dart';
 import 'package:json_annotation/json_annotation.dart' hide JsonConverter;
 
 part 'api.g.dart';
 part 'api.chopper.dart';
+
+const login = "gilewski";
 
 @JsonSerializable()
 class UserRes {
@@ -12,13 +15,10 @@ class UserRes {
   @JsonKey(name: 'image_url')
   final String imageUrl;
 
-  UserRes({
-    required this.login,
-    required this.name,
-    required this.imageUrl,
-  });
+  UserRes({required this.login, required this.name, required this.imageUrl});
 
-  factory UserRes.fromJson(Map<String, dynamic> json) => _$UserResFromJson(json);
+  factory UserRes.fromJson(Map<String, dynamic> json) =>
+      _$UserResFromJson(json);
   Map<String, dynamic> toJson() => _$UserResToJson(this);
 }
 
@@ -28,7 +28,8 @@ class SwipeRes {
 
   SwipeRes({required this.matched});
 
-  factory SwipeRes.fromJson(Map<String, dynamic> json) => _$SwipeResFromJson(json);
+  factory SwipeRes.fromJson(Map<String, dynamic> json) =>
+      _$SwipeResFromJson(json);
   Map<String, dynamic> toJson() => _$SwipeResToJson(this);
 }
 
@@ -79,6 +80,66 @@ abstract class ApiService extends ChopperService {
   Future<Response> getBlob(@Path('hash') String hash);
 }
 
+class ApiConverter extends JsonConverter {
+  const ApiConverter();
+
+  @override
+  FutureOr<Response<BodyType>> convertResponse<BodyType, SingleItemType>(
+      Response response) {
+    print("ApiConverter: Converting response for type $BodyType");
+    print("ApiConverter: Raw response body: ${response.body}");
+    print("ApiConverter: Response status: ${response.statusCode}");
+    
+    // Don't call super - handle the conversion ourselves
+    final rawBody = response.body;
+    
+    if (rawBody == null) {
+      print("ApiConverter: Raw body is null");
+      return Response(response.base, null, error: response.error);
+    }
+
+    // Parse JSON string if needed
+    dynamic jsonBody;
+    if (rawBody is String) {
+      try {
+        jsonBody = json.decode(rawBody);
+        print("ApiConverter: Parsed JSON from string: $jsonBody");
+      } catch (e) {
+        print("ApiConverter: Failed to parse JSON: $e");
+        return Response(response.base, null, error: e);
+      }
+    } else {
+      jsonBody = rawBody;
+    }
+
+    // Handle different response types
+    BodyType? convertedBody;
+    try {
+      if (BodyType == UserRes) {
+        print("ApiConverter: Converting to UserRes");
+        convertedBody = UserRes.fromJson(jsonBody as Map<String, dynamic>) as BodyType;
+        print("ApiConverter: Successfully converted to UserRes: $convertedBody");
+      } else if (BodyType == SwipeRes) {
+        print("ApiConverter: Converting to SwipeRes");
+        convertedBody = SwipeRes.fromJson(jsonBody as Map<String, dynamic>) as BodyType;
+      } else if (BodyType == Item) {
+        print("ApiConverter: Converting to Item");
+        convertedBody = Item.fromJson(jsonBody as Map<String, dynamic>) as BodyType;
+      } else {
+        print("ApiConverter: No specific converter for $BodyType, falling back to parent");
+        // For other types, use parent converter
+        return super.convertResponse<BodyType, SingleItemType>(response);
+      }
+    } catch (e, stackTrace) {
+      print("ApiConverter: Error converting: $e");
+      print("ApiConverter: Stack trace: $stackTrace");
+      return Response(response.base, null, error: e);
+    }
+
+    return Response(response.base, convertedBody, error: response.error);
+  }
+}
+
 class ApiClient {
   late final ChopperClient _chopperClient;
   late final ApiService _apiService;
@@ -87,11 +148,8 @@ class ApiClient {
     _chopperClient = ChopperClient(
       baseUrl: Uri.parse(baseUrl ?? 'http://localhost:8000'),
       services: [ApiService.create()],
-      converter: const JsonConverter(),
-      interceptors: [
-        HttpLoggingInterceptor(),
-        HeadersInterceptor(),
-      ],
+      converter: const ApiConverter(),
+      interceptors: [HttpLoggingInterceptor(), HeadersInterceptor()],
     );
     _apiService = _chopperClient.getService<ApiService>();
   }
@@ -105,11 +163,14 @@ class ApiClient {
 
 class HeadersInterceptor implements Interceptor {
   @override
-  FutureOr<Response<BodyType>> intercept<BodyType>(Chain<BodyType> chain) async {
+  FutureOr<Response<BodyType>> intercept<BodyType>(
+    Chain<BodyType> chain,
+  ) async {
     final request = chain.request.copyWith(
       headers: {
         ...chain.request.headers,
         'Content-Type': 'application/json',
+        "X-Login": login,
       },
     );
     return chain.proceed(request);

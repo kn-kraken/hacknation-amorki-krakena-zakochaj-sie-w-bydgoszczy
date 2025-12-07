@@ -1,10 +1,20 @@
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from .dependencies import get_query_token, get_token_header
 from .internal import admin
 from .routers import items, users, blobs
 
 app = FastAPI(dependencies=[Depends(get_query_token)])
+
+# Disable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 app.include_router(blobs.router)
