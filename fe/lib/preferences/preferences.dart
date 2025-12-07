@@ -7,6 +7,7 @@ enum PreferencesStatus {
   listDatesNoSwipe,
   listProfiles,
   datePage, // blank for now
+  matched, // means user is looking for love
 }
 
 class PreferencesState {
@@ -43,26 +44,41 @@ class PreferencesCubit extends Cubit<PreferencesState> {
 
   // User selects "YES" on the initial page
   void startPreferencesFlow() {
-    emit(state.copyWith(status: PreferencesStatus.listDatesShouldSwipe, shouldSwipe: true));
+    emit(
+      state.copyWith(
+        status: PreferencesStatus.listDatesShouldSwipe,
+        shouldSwipe: true,
+      ),
+    );
   }
 
   // User selects "NO" on the initial page
   void startPreferencesNoSwipe() {
-    emit(state.copyWith(status: PreferencesStatus.listDatesShouldSwipe, shouldSwipe: false));
+    emit(
+      state.copyWith(
+        status: PreferencesStatus.listDatesShouldSwipe,
+        shouldSwipe: false,
+      ),
+    );
   }
 
   // User selects a date from the list
   void selectDate(String dateId) {
     if (state.shouldSwipe) {
-      emit(state.copyWith(
-        status: PreferencesStatus.listProfiles, // Directly goes to Swiping Screen
-        selectedDateId: dateId,
-      ));
+      emit(
+        state.copyWith(
+          status:
+              PreferencesStatus.listProfiles, // Directly goes to Swiping Screen
+          selectedDateId: dateId,
+        ),
+      );
     } else {
-      emit(state.copyWith(
-        status: PreferencesStatus.datePage,
-        selectedDateId: dateId,
-      ));
+      emit(
+        state.copyWith(
+          status: PreferencesStatus.datePage,
+          selectedDateId: dateId,
+        ),
+      );
     }
   }
 
@@ -72,24 +88,33 @@ class PreferencesCubit extends Cubit<PreferencesState> {
       case PreferencesStatus.listProfiles:
       case PreferencesStatus.datePage:
         if (state.shouldSwipe) {
-          emit(state.copyWith(
-            status: PreferencesStatus.listDatesShouldSwipe,
-            selectedDateId: null,
-          ));
+          emit(
+            state.copyWith(
+              status: PreferencesStatus.listDatesShouldSwipe,
+              selectedDateId: null,
+            ),
+          );
         } else {
-          emit(state.copyWith(
-            status: PreferencesStatus.listDatesNoSwipe,
-            selectedDateId: null,
-          ));
+          emit(
+            state.copyWith(
+              status: PreferencesStatus.listDatesNoSwipe,
+              selectedDateId: null,
+            ),
+          );
         }
         break;
       case PreferencesStatus.listDatesShouldSwipe:
       case PreferencesStatus.listDatesNoSwipe:
-        emit(state.copyWith(
-          status: PreferencesStatus.initial,
-          selectedDateId: null,
-          shouldSwipe: false,
-        ));
+        emit(
+          state.copyWith(
+            status: PreferencesStatus.initial,
+            selectedDateId: null,
+            shouldSwipe: false,
+          ),
+        );
+        break;
+      case PreferencesStatus.matched:
+        emit(state.copyWith(status: PreferencesStatus.listProfiles));
         break;
       case PreferencesStatus.initial:
         break;

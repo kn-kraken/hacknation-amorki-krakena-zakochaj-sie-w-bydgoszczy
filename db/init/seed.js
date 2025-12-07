@@ -32,3 +32,9 @@ db.users.insertMany([
   // { login: "wietrzynski", name: "Mariusz Wietrzyński", gender: "m", image_hash: blobs[28].hash},
   // { login: "kotecki",     name: "Bogumił Kotecki",     gender: "m", image_hash: blobs[29].hash}, 
 ]);
+
+
+db.user_links.insertMany([
+  {"login_1": "piotr", "login_2": "ania", "approved_1": undefined, "approved_2": true},
+  {"login_1": "piotr", "login_2": "julia", "approved_1": undefined, "approved_2": true},
+])

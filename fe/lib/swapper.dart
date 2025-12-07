@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math';
 import 'api.dart';
+import 'package:zakochaj_sie_w_bydgoszczy_fe/preferences/preferences.dart';
 
 // Models
 class CardItem {
@@ -76,8 +77,9 @@ class SwipeState {
 // BLoC
 class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
   final ApiService apiService;
+  final PreferencesCubit preferences;
 
-  SwipeBloc({required this.apiService})
+  SwipeBloc({required this.apiService, required this.preferences})
     : super(
         SwipeState(
           cards: [],
@@ -101,7 +103,16 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
     });
 
     on<SwipeRight>((event, emit) async {
-      await apiService.swipeUser(event.card.login, true);
+      final response = await apiService.swipeUser(event.card.login, true);
+      if (!response.isSuccessful) return;
+
+      final matched = response.body!.matched;
+      if (matched) {
+        final newState = preferences.state.copyWith(
+          status: PreferencesStatus.matched,
+        );
+        preferences.emit(newState);
+      }
       
       emit(
         state.copyWith(
