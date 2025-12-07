@@ -15,12 +15,16 @@ router = APIRouter(tags=["users"])
 class User(TypedDict):
     login: str
     name: str
+    age: int
+    description: str
     image_hash: str
 
 
 class UserRes(BaseModel):
     login: str
     name: str
+    age: int
+    description: str
     image_url: str
 
     @classmethod
@@ -28,6 +32,8 @@ class UserRes(BaseModel):
         return cls(
             login=user["login"],
             name=user["name"],
+            age=user["age"],
+            description=user["description"],
             image_url=f"{base_url}blobs/{user["image_hash"]}",
         )
 

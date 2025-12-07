@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/header.dart';
+import 'package:zakochaj_sie_w_bydgoszczy_fe/match.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/swapper.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/date_page.dart';
 import 'package:zakochaj_sie_w_bydgoszczy_fe/preferences/preferences.dart';
@@ -52,6 +52,8 @@ class PreferencesScreen extends StatelessWidget {
         return const SwipeCardsScreenContent();
       case PreferencesStatus.datePage:
         return const DatePage();
+      case PreferencesStatus.matched:
+        return const MatchScreen();
     }
   }
 }
@@ -69,11 +71,13 @@ class InitialPage extends StatelessWidget {
       color: _kBackgroundColor,
       child: Column(
         children: <Widget>[
-
           Expanded(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 20,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -108,7 +112,8 @@ class ListDatesPage extends StatelessWidget {
     {
       'id': '1',
       'title': 'Coffee Date',
-      'desc': 'Quick and casualQuick and casualQuick and casualQuick and casualQuick and casual',
+      'desc':
+          'Quick and casualQuick and casualQuick and casualQuick and casualQuick and casual',
       // 'image': 'assets/images/coffee.jpg', // Add your image path
     },
     {

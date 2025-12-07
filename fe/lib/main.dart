@@ -52,7 +52,12 @@ class MyApp extends StatelessWidget {
         child: MultiBlocProvider(
           providers: [
             BlocProvider(create: (_) => PreferencesCubit()),
-            BlocProvider(create: (context) => SwipeBloc(apiService: Provider.of<ApiClient>(context, listen: false).api)),
+            BlocProvider(
+              create: (context) => SwipeBloc(
+                apiService: context.read<ApiClient>().api,
+                preferences: context.read<PreferencesCubit>(),
+              ),
+            ),
           ],
           child: const PreferencesScreen(),
         ),
