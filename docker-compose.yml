@@ -7,9 +7,19 @@ services:
       context: be
     container_name: be
     ports:
-      - "80:80"
+      - "8080:80"
     environment:
       CONNECTION_STRING: mongodb://admin:password@localhost:27017/bydgoszcz?authSource=admin
+    networks:
+      - app_network
+  fe:
+    build:
+      context: fe
+    container_name: fe
+    ports:
+      - "80:80"
+    environment:
+      BASE_URL: http://192.168.1.10:8080
     networks:
       - app_network
   db:
