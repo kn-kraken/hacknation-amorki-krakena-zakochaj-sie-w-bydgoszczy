@@ -67,7 +67,7 @@ class FunFactCard extends StatelessWidget {
 
             Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.only(top: 16),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -76,21 +76,21 @@ class FunFactCard extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Color(0xFFdbdad8),
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 2,
                         fontFamily: 'Serif',
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8),
 SizedBox( width: 300, child:
                     Text(
                       funFact,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Color(0xFFdbdad8),
-                        fontSize: 14,
+                        fontSize: 12,
                         height: 1.5,
                         fontFamily: 'Serif',
                       ),

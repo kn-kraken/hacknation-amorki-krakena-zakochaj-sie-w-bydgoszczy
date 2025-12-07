@@ -179,28 +179,71 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
   }
 
   Widget _buildQuizContent() {
-    if (_stepData is! api.Question) {
-      return const Center(
-        child: Text(
-          'This step is not a quiz question',
-          style: TextStyle(fontSize: 16),
+    // If the step is a quiz question
+    if (_stepData is api.Question) {
+      final question = _stepData as api.Question;
+      final correctAnswerIndex = question.validAnswerIndex;
+
+      return SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Header(text: 'Przystanek ${question.id}'),
+              const SizedBox(height: 16),
+
+              Text(
+                question.question,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF6B1D27),
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 24),
+
+              ...List.generate(question.answers.length, (index) {
+                final isSelected = _selectedAnswer == index;
+                final isCorrect = index == correctAnswerIndex;
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: AnswerOption(
+                    letter: String.fromCharCode(65 + index),
+                    text: question.answers[index],
+                    isSelected: isSelected,
+                    isCorrect: isCorrect,
+                    hasAnswered: _hasAnswered,
+                    onTap: (_hasAnswered || _isCompleted)
+                        ? null
+                        : () => _checkAnswer(index),
+                  ),
+                );
+              }),
+
+              const SizedBox(height: 16),
+
+              FunFactCard(
+                funFact: question.curiocity,
+                wikipediaUrl: 'https://visitbydgoszcz.pl/pl/',
+              ),
+            ],
+          ),
         ),
       );
     }
 
-    final question = _stepData as api.Question;
-    final correctAnswerIndex = question.validAnswerIndex;
-
+    // If the step is NOT a quiz → Display task-style screen
+    final step = _stepData as api.Task; // Guaranteed not null here
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Header(text: 'Quiz Step ${question.id}'),
-            const SizedBox(height: 16),
-            
             Text(
-              question.question,
+              step.task ?? "No task available.",
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -208,34 +251,12 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 24),
 
-            // Answer Options
-            ...List.generate(question.answers.length, (index) {
-              final isSelected = _selectedAnswer == index;
-              final isCorrect = index == correctAnswerIndex;
-
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: AnswerOption(
-                  letter: String.fromCharCode(65 + index),
-                  text: question.answers[index],
-                  isSelected: isSelected,
-                  isCorrect: isCorrect,
-                  hasAnswered: _hasAnswered,
-                  onTap: (_hasAnswered || _isCompleted)
-                      ? null
-                      : () => _checkAnswer(index),
-                ),
-              );
-            }),
-
-            const SizedBox(height: 16),
-
             FunFactCard(
-              funFact: question.curiocity,
-              wikipediaUrl: 'https://visitbydgoszcz.pl/pl/', // Default fallback
+              funFact: step.curiocity ?? "Interesting place fact!",
+              wikipediaUrl: 'https://visitbydgoszcz.pl/pl/',
             ),
           ],
         ),
@@ -291,7 +312,7 @@ class AnswerOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: 20,
-          vertical: 18,
+          vertical: 12,
         ),
         decoration: BoxDecoration(
           color: const Color(0xFFdbdad8),
