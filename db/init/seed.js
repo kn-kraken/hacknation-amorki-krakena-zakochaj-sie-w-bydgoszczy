@@ -99,8 +99,8 @@ steps = [
   {
     id: 1,
     type: "question",
-    lat: 53.123275,
-    long: 18.001697,
+    lat: 53.123208,
+    long: 18.001261,
     question:
       "Zaobserwuj rzeźbę przy moście. Zgadnij nazwę rzeźby, którą widzisz:",
     answers: ["Akrobata", "Przechodzący przez rzekę", "Dzień w chmurach"],

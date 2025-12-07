@@ -48,16 +48,20 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _loadScenarioSteps() async {
     // Assuming scenario ID 1 - you might want to make this configurable
     final response = await _apiClient.api.getScenarioSteps(1);
-    
+
     if (response.body != null) {
       setState(() {
-        _waypoints = response.body!.map((step) => {
-          'id': step.id,
-          'location': LatLng(step.lat, step.long),
-        }).toList();
+        _waypoints = response.body!
+            .map(
+              (step) => {
+                'id': step.id,
+                'location': LatLng(step.lat, step.long),
+              },
+            )
+            .toList();
         _isLoadingWaypoints = false;
       });
-      
+
       _fetchRoute();
     }
   }
@@ -75,9 +79,9 @@ class _MapScreenState extends State<MapScreen> {
         final start = _waypoints[i]['location'] as LatLng;
         final end = _waypoints[i + 1]['location'] as LatLng;
 
-        // Using OSRM (Open Source Routing Machine) - no API key needed
+        // Using routing.openstreetmap.de for pedestrian routing
         final url = Uri.parse(
-          'https://router.project-osrm.org/route/v1/walking/'
+          'https://routing.openstreetmap.de/routed-foot/route/v1/foot/'
           '${start.longitude},${start.latitude};'
           '${end.longitude},${end.latitude}'
           '?overview=full&geometries=geojson',
@@ -143,15 +147,14 @@ class _MapScreenState extends State<MapScreen> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text(
-                    'Loading waypoints...',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                  Text('Loading waypoints...', style: TextStyle(fontSize: 16)),
                 ],
               ),
             )
           : _buildMapView(),
-      floatingActionButton: _isLoadingWaypoints ? null : _buildFloatingActionButtons(),
+      floatingActionButton: _isLoadingWaypoints
+          ? null
+          : _buildFloatingActionButtons(),
     );
   }
 
@@ -162,117 +165,117 @@ class _MapScreenState extends State<MapScreen> {
         : _waypoints.map((wp) => wp['location'] as LatLng).toList();
 
     return GestureDetector(
-        onScaleStart: (_) {},
-        onScaleUpdate: (_) {},
-        onScaleEnd: (_) {},
-        child: FlutterMap(
-          mapController: _mapController,
-          options: MapOptions(
-            initialCenter: _center,
-            initialZoom: 14.0,
-            minZoom: 10.0,
-            maxZoom: 18.0,
-            interactionOptions: const InteractionOptions(
-              flags: InteractiveFlag.all,
-              enableMultiFingerGestureRace: true,
-            ),
+      onScaleStart: (_) {},
+      onScaleUpdate: (_) {},
+      onScaleEnd: (_) {},
+      child: FlutterMap(
+        mapController: _mapController,
+        options: MapOptions(
+          initialCenter: _center,
+          initialZoom: 14.0,
+          minZoom: 10.0,
+          maxZoom: 18.0,
+          interactionOptions: const InteractionOptions(
+            flags: InteractiveFlag.all,
+            enableMultiFingerGestureRace: true,
           ),
-          children: [
-            // Tile layer (map tiles)
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.example.app',
-            ),
-
-            // Polyline layer (path between waypoints)
-            PolylineLayer(
-              polylines: [
-                Polyline(
-                  points: pathPoints,
-                  strokeWidth: 4.0,
-                  color: _isLoadingRoute
-                      ? Colors.grey.withOpacity(0.5)
-                      : Color(0xFF8B2F3A).withOpacity(0.7),
-                  borderStrokeWidth: 1.5,
-                  borderColor: Colors.white,
-                  pattern: StrokePattern.dotted(),
-                ),
-              ],
-            ),
-
-            // Marker layer (custom markers with images)
-            MarkerLayer(
-              markers: _waypoints.asMap().entries.map((entry) {
-                int idx = entry.key;
-                Map<String, dynamic> wp = entry.value;
-
-                return Marker(
-                  point: wp['location'] as LatLng,
-                  width: 50,
-                  height: 70,
-                  alignment: Alignment.center,
-                  child: GestureDetector(
-                    onTap: () {
-                      // Navigate to quiz screen with location index
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              QuizViewScreen(locationIndex: idx),
-                        ),
-                      );
-                    },
-                    child: Stack(
-                      alignment: Alignment.center,
-                      clipBehavior: Clip.none,
-                      children: [
-                        // Pin icon as background
-                        const Positioned(
-                          top: 0,
-                          child: Icon(
-                            Icons.location_on,
-                            size: 50,
-                            color: Color(0xFF6B1D27),
-                            shadows: [
-                              Shadow(
-                                color: Colors.black26,
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Number in the middle of pin
-                        Positioned(
-                          top: 8,
-                          child: Container(
-                            width: 22,
-                            height: 22,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${idx + 1}',
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
         ),
-      );
+        children: [
+          // Tile layer (map tiles)
+          TileLayer(
+            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            userAgentPackageName: 'com.example.app',
+          ),
+
+          // Polyline layer (path between waypoints)
+          PolylineLayer(
+            polylines: [
+              Polyline(
+                points: pathPoints,
+                strokeWidth: 4.0,
+                color: _isLoadingRoute
+                    ? Colors.grey.withOpacity(0.5)
+                    : Color(0xFF8B2F3A).withOpacity(0.7),
+                borderStrokeWidth: 1.5,
+                borderColor: Colors.white,
+                pattern: StrokePattern.dotted(),
+              ),
+            ],
+          ),
+
+          // Marker layer (custom markers with images)
+          MarkerLayer(
+            markers: _waypoints.asMap().entries.map((entry) {
+              int idx = entry.key;
+              Map<String, dynamic> wp = entry.value;
+
+              return Marker(
+                point: wp['location'] as LatLng,
+                width: 50,
+                height: 70,
+                alignment: Alignment.center,
+                child: GestureDetector(
+                  onTap: () {
+                    // Navigate to quiz screen with location index
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            QuizViewScreen(locationIndex: idx),
+                      ),
+                    );
+                  },
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Pin icon as background
+                      const Positioned(
+                        top: 0,
+                        child: Icon(
+                          Icons.location_on,
+                          size: 50,
+                          color: Color(0xFF6B1D27),
+                          shadows: [
+                            Shadow(
+                              color: Colors.black26,
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Number in the middle of pin
+                      Positioned(
+                        top: 8,
+                        child: Container(
+                          width: 22,
+                          height: 22,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${idx + 1}',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildFloatingActionButtons() {
@@ -285,10 +288,7 @@ class _MapScreenState extends State<MapScreen> {
           mini: true,
           onPressed: () {
             final currentZoom = _mapController.camera.zoom;
-            _mapController.move(
-              _mapController.camera.center,
-              currentZoom + 1,
-            );
+            _mapController.move(_mapController.camera.center, currentZoom + 1);
           },
           child: const Icon(Icons.add),
         ),
@@ -300,10 +300,7 @@ class _MapScreenState extends State<MapScreen> {
           mini: true,
           onPressed: () {
             final currentZoom = _mapController.camera.zoom;
-            _mapController.move(
-              _mapController.camera.center,
-              currentZoom - 1,
-            );
+            _mapController.move(_mapController.camera.center, currentZoom - 1);
           },
           child: const Icon(Icons.remove),
         ),
