@@ -2,6 +2,16 @@ version: "3.8"
 name: "bydgoszcz"
 
 services:
+  be:
+    build:
+      context: be
+    container_name: be
+    ports:
+      - "80:80"
+    environment:
+      CONNECTION_STRING: mongodb://admin:password@localhost:27017/bydgoszcz?authSource=admin
+    networks:
+      - app_network
   db:
     image: mongo:7
     container_name: mongodb
