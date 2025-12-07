@@ -72,9 +72,12 @@ class StepInfoRes {
 }
 
 sealed class Step {
+  Step();
+
   factory Step.fromJson(Map<String, dynamic> json) => switch (json["type"]) {
     "question" => Question.fromJson(json),
     "task" => Task.fromJson(json),
+     _ => throw Exception("Invalid step type ${json['type']}")
   };
 }
 
@@ -208,6 +211,10 @@ class ApiConverter extends JsonConverter {
       Question => Question.fromJson(jsonBody),
       Task => Task.fromJson(jsonBody),
       Step => Step.fromJson(jsonBody),
+      const (List<UserRes>) => (jsonBody as List).map((item) => UserRes.fromJson(item)).toList(),
+      const (List<ScenarioInfoRes>) => (jsonBody as List).map((item) => ScenarioInfoRes.fromJson(item)).toList(),
+      const (List<StepInfoRes>) => (jsonBody as List).map((item) => StepInfoRes.fromJson(item)).toList(),
+      const (Map<String, Item>) => (jsonBody as Map<String, dynamic>).map((key, value) => MapEntry(key, Item.fromJson(value))),
       _ => super.convertResponse<BodyType, SingleItemType>(response),
     } as BodyType;
 
