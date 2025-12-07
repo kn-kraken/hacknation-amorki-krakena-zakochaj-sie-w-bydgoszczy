@@ -88,38 +88,21 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
         ),
       ) {
     on<LoadNextUser>((event, emit) async {
-      try {
-        emit(state.copyWith(isLoading: true));
-        debugPrint("a - Starting API call");
-        final response = await apiService.getNextUser();
-        debugPrint("b - response: $response");
-        debugPrint("b2 - response statusCode: ${response.statusCode}");
-        debugPrint("b3 - response body: ${response.body}");
-        debugPrint("b4 - response isSuccessful: ${response.isSuccessful}");
-        
-        if (!response.isSuccessful) {
-          debugPrint("d - unsuccessful response");
-          emit(state.copyWith(isLoading: false));
-          return;
-        }
+      emit(state.copyWith(isLoading: true));
+      final response = await apiService.getNextUser();
 
-        if (response.body == null) {
-          debugPrint("e - response body is null");
-          emit(state.copyWith(isLoading: false));
-          return;
-        }
-
-        debugPrint("c - successful response with body");
-        final newCard = CardItem.fromUserRes(response.body!);
-        emit(state.copyWith(cards: [...state.cards, newCard], isLoading: false));
-      } catch (e, stackTrace) {
-        debugPrint("f - exception: $e");
-        debugPrint("f2 - stackTrace: $stackTrace");
+      if (!response.isSuccessful) {
         emit(state.copyWith(isLoading: false));
+        return;
       }
+
+      final newCard = CardItem.fromUserRes(response.body!);
+      emit(state.copyWith(cards: [...state.cards, newCard], isLoading: false));
     });
 
-    on<SwipeRight>((event, emit) {
+    on<SwipeRight>((event, emit) async {
+      await apiService.swipeUser(event.card.login, true);
+      
       emit(
         state.copyWith(
           likedCards: [...state.likedCards, event.card],
@@ -133,7 +116,9 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
       }
     });
 
-    on<SwipeLeft>((event, emit) {
+    on<SwipeLeft>((event, emit) async {
+      await apiService.swipeUser(event.card.login, false);
+      
       emit(
         state.copyWith(
           dislikedCards: [...state.dislikedCards, event.card],
