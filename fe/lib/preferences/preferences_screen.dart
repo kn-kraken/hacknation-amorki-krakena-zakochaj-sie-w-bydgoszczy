@@ -80,8 +80,7 @@ class PreferencesScreen extends StatelessWidget {
 class InitialPage extends StatelessWidget {
   const InitialPage({super.key});
   static const String _kStampFramePath = 'assets/stamp.svg';
-  static const String _kDecorativePngPath =
-      'assets/your_image.png'; // Replace with your PNG path
+  static const String _kDecorativePngPath = 'assets/luczniczka.png';
   static const Color _kBackgroundColor = Color(0xFFdbdad8);
 
   @override
@@ -90,49 +89,71 @@ class InitialPage extends StatelessWidget {
 
     return Container(
       color: _kBackgroundColor,
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 20,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment:
-                      CrossAxisAlignment.center, // Center horizontally
-                  children: [
-                    const Text(
-                      "Tutaj historia łączy…\n a my podpowiadamy z kim",
-                      textAlign: TextAlign.center, // Center the text
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF6B1D27),
-                        letterSpacing: 2,
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    Header(text: 'CZEGO DZIŚ SZUKASZ'),
-                    StampedButton(
-                      text: 'SZUKAM PARY',
-                      onPressed: () => cubit.startPreferencesFlow(),
-                      svgAssetPath: _kStampFramePath,
-                    ),
-                    const SizedBox(height: 30),
-                    StampedButton(
-                      text: 'MAM PARTNERA/\nPARTNERKĘ',
-                      onPressed: () => cubit.startPreferencesNoSwipe(),
-                      svgAssetPath: _kStampFramePath,
-                    ),
-                  ],
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+
+              /// ---------------- FULL-WIDTH MAIN TITLE ----------------
+              const Text(
+                "Tutaj historia łączy…\n a my podpowiadamy z kim",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF6B1D27),
+                  letterSpacing: 2,
                 ),
               ),
-            ),
+
+              /// ---------------- FULL-WIDTH HEADER ----------------
+              const Header(text: 'CZEGO DZIŚ SZUKASZ?'),
+
+              /// ---------------- LEFT IMAGE + RIGHT BUTTONS ----------------
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// LEFT PNG
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical:5),
+                      child: Image.asset(
+                        _kDecorativePngPath,
+                        fit: BoxFit.contain,
+                        height: 320,
+                      ),
+                    ),
+
+                  /// RIGHT BUTTON AREA
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+
+                        StampedButton(
+                          text: 'SZUKAM PARY',
+                          onPressed: () => cubit.startPreferencesFlow(),
+                          svgAssetPath: _kStampFramePath,
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        StampedButton(
+                          text: 'MAM PARTNERA/\nPARTNERKĘ',
+                          onPressed: () => cubit.startPreferencesNoSwipe(),
+                          svgAssetPath: _kStampFramePath,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

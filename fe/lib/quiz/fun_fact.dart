@@ -44,7 +44,7 @@ class FunFactCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 50),
+      padding: EdgeInsets.all(0),
       child: SizedBox(
         height: 250,
         child: Stack(

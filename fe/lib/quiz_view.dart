@@ -192,67 +192,67 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
       final correctAnswerIndex = question.validAnswerIndex;
 
       return SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(
-              width: double.infinity,
-              height: 200,
-              child: Image.network(
-                question.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.broken_image, size: 50),
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Text(
-                    question.question,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF6B1D27),
-                    ),
-                    textAlign: TextAlign.center,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Container(
+                  width: double.infinity,
+                  height: 200,
+                  child: Image.network(
+                    question.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.broken_image, size: 50),
+                      );
+                    },
                   ),
-
-                  const SizedBox(height: 24),
-
-                  ...List.generate(question.answers.length, (index) {
-                    final isSelected = _selectedAnswer == index;
-                    final isCorrect = index == correctAnswerIndex;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: AnswerOption(
-                        letter: String.fromCharCode(65 + index),
-                        text: question.answers[index],
-                        isSelected: isSelected,
-                        isCorrect: isCorrect,
-                        hasAnswered: _hasAnswered,
-                        onTap: (_hasAnswered || _isCompleted)
-                            ? null
-                            : () => _checkAnswer(index),
-                      ),
-                    );
-                  }),
-
-                  const SizedBox(height: 16),
-
-                  FunFactCard(
-                    funFact: question.curiocity,
-                    wikipediaUrl: 'https://visitbydgoszcz.pl/pl/',
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
+
+              Text(
+                question.question,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF6B1D27),
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 24),
+
+              ...List.generate(question.answers.length, (index) {
+                final isSelected = _selectedAnswer == index;
+                final isCorrect = index == correctAnswerIndex;
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: AnswerOption(
+                    letter: String.fromCharCode(65 + index),
+                    text: question.answers[index],
+                    isSelected: isSelected,
+                    isCorrect: isCorrect,
+                    hasAnswered: _hasAnswered,
+                    onTap: (_hasAnswered || _isCompleted)
+                        ? null
+                        : () => _checkAnswer(index),
+                  ),
+                );
+              }),
+
+              const SizedBox(height: 16),
+
+              FunFactCard(
+                funFact: question.curiocity,
+                wikipediaUrl: 'https://visitbydgoszcz.pl/pl/',
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -260,46 +260,46 @@ class _QuizViewScreenState extends State<QuizViewScreen> {
     // If the step is NOT a quiz → Display task-style screen
     final step = _stepData as api.Task; // Guaranteed not null here
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          SizedBox(
-            width: double.infinity,
-            height: 200,
-            child: Image.network(
-              step.imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.broken_image, size: 50),
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Text(
-                  step.task,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF6B1D27),
-                  ),
-                  textAlign: TextAlign.center,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Container(
+                width: double.infinity,
+                height: 200,
+                child: Image.network(
+                  step.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.broken_image, size: 50),
+                    );
+                  },
                 ),
-
-                const SizedBox(height: 24),
-
-                FunFactCard(
-                  funFact: step.curiocity ?? "Interesting place fact!",
-                  wikipediaUrl: 'https://visitbydgoszcz.pl/pl/',
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+
+            Text(
+              step.task ?? "No task available.",
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF6B1D27),
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 24),
+
+            FunFactCard(
+              funFact: step.curiocity ?? "Interesting place fact!",
+              wikipediaUrl: 'https://visitbydgoszcz.pl/pl/',
+            ),
+          ],
+        ),
       ),
     );
   }
